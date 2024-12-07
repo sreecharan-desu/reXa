@@ -5,6 +5,7 @@ import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import Documentation from './pages/Documentation';
 
 const App = () => (
   <BrowserRouter>

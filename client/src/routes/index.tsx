@@ -8,6 +8,7 @@ import { RewardDetails } from '../pages/RewardDetails';
 import { MyRewards } from '../pages/MyRewards';
 import { EditReward } from '../pages/EditReward';
 import { useAuth } from '../context/AuthContext';
+import Documentation from '../pages/Documentation';
 
 export const AppRoutes = () => {
     const { isAuthenticated } = useAuth();
@@ -18,7 +19,7 @@ export const AppRoutes = () => {
             <Route path="/" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/register" element={<Register />} />
-
+            <Route path="/documentation" element={<Documentation />} />
             {/* Protected Routes */}
             <Route 
                 path="/profile" 

@@ -24,6 +24,12 @@ export const Navbar = () => {
                             reX
                         </span>
                     </Link>
+                    <Link 
+  to="/documentation" 
+  className="text-gray-600 hover:text-indigo-600"
+>
+  API Docs
+</Link>
                     <div className="flex items-center gap-6">
                         {isAuthenticated ? (
                             <div className="flex items-center gap-4">
