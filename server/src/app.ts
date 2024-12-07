@@ -38,6 +38,14 @@ app.get('/', (req, res) => {
     });
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ 
+        status: 'healthy',
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rewards', rewardRoutes);
