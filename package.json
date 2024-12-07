@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "dev": "ts-node-dev src/index.ts",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "deploy": "docker-compose up -d"
+  }
+} 

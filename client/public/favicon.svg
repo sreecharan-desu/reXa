@@ -1,0 +1,66 @@
+<svg 
+    width="40" height="40" 
+    viewBox="0 0 40 40" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg"
+>
+    <g>
+        <!-- Top Platform -->
+        <path 
+            d="M8 14L20 7L32 14L20 21L8 14Z" 
+            fill="url(#top-gradient)"
+        />
+        
+        <!-- Middle Platform -->
+        <path 
+            d="M8 21L20 14L32 21L20 28L8 21Z" 
+            fill="url(#middle-gradient)"
+            fill-opacity="0.9"
+        />
+        
+        <!-- Bottom Platform -->
+        <path 
+            d="M8 28L20 21L32 28L20 35L8 28Z" 
+            fill="url(#bottom-gradient)"
+            fill-opacity="0.8"
+        />
+
+        <defs>
+            <linearGradient 
+                id="top-gradient" 
+                x1="8" 
+                y1="7" 
+                x2="32" 
+                y2="21" 
+                gradientUnits="userSpaceOnUse"
+            >
+                <stop stop-color="#06b6d4" />
+                <stop offset="1" stop-color="#3b82f6" />
+            </linearGradient>
+
+            <linearGradient 
+                id="middle-gradient" 
+                x1="8" 
+                y1="14" 
+                x2="32" 
+                y2="28" 
+                gradientUnits="userSpaceOnUse"
+            >
+                <stop stop-color="#0ea5e9" />
+                <stop offset="1" stop-color="#2563eb" />
+            </linearGradient>
+
+            <linearGradient 
+                id="bottom-gradient" 
+                x1="8" 
+                y1="21" 
+                x2="32" 
+                y2="35" 
+                gradientUnits="userSpaceOnUse"
+            >
+                <stop stop-color="#0284c7" />
+                <stop offset="1" stop-color="#1d4ed8" />
+            </linearGradient>
+        </defs>
+    </g>
+</svg> 
