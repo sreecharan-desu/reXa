@@ -28,12 +28,13 @@ app.use(cors({
 
 app.use(express.json());
 
-// Global Error Handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('Error:', err);
-    res.status(err.status || 500).json({
-        message: err.message || 'Internal server error',
-        ...(CONFIG.NODE_ENV === 'development' && { stack: err.stack })
+// Root route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Welcome to reX API 🚀',
+        status: 'active',
+        version: CONFIG.API_VERSION,
+        environment: CONFIG.NODE_ENV
     });
 });
 
@@ -43,5 +44,14 @@ app.use('/api/rewards', rewardRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/requests', requestRoutes);
+
+// Global Error Handler
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Error:', err);
+    res.status(err.status || 500).json({
+        message: err.message || 'Internal server error',
+        ...(CONFIG.NODE_ENV === 'development' && { stack: err.stack })
+    });
+});
 
 export default app; 
