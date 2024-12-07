@@ -1,6 +1,8 @@
+import { CONFIG } from './config';
+
 export const JWT_CONFIG = {
-    secret: process.env.JWT_SECRET || 'your-secret-key',
-    expiresIn: '7d'
+    secret: CONFIG.JWT_SECRET,
+    expiresIn: CONFIG.JWT_EXPIRES_IN
 }; 
 
-export const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+export const JWT_SECRET = process.env.JWT_SECRET;

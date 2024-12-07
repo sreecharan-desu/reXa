@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../models/user.model';
 import { JWT_CONFIG } from '../config/jwt.config';
 import { AuthRequest } from '../middleware/auth';
+import { CONFIG } from '../config/config';
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -81,8 +82,8 @@ export const login = async (req: Request, res: Response) => {
 
         const token = jwt.sign(
             { userId: user._id },
-            process.env.JWT_SECRET || 'your-secret-key',
-            { expiresIn: '24h' }
+            CONFIG.JWT_SECRET!,
+            { expiresIn: CONFIG.JWT_EXPIRES_IN }
         );
 
         res.json({
