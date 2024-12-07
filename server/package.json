@@ -7,9 +7,7 @@
     "start": "node dist/index.js",
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
     "build": "tsc",
-    "lint": "eslint . --ext .ts",
-    "test": "jest",
-    "migrate:points": "ts-node src/scripts/addPointsToExistingUsers.ts"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
     "@types/compression": "^1.7.5",
