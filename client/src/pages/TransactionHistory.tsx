@@ -34,11 +34,12 @@ export const TransactionHistory = () => {
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
+                setLoading(true);
                 const response = await transactionApi.getMyTransactions();
                 setTransactions(response.data);
-            } catch (error) {
-                toast.error('Failed to load transaction history');
+            } catch (error: any) {
                 console.error('Error fetching transactions:', error);
+                toast.error(error.response?.data?.message || 'Failed to load transaction history');
             } finally {
                 setLoading(false);
             }
