@@ -6,7 +6,7 @@ import { redeemLimiter } from '../middleware/rateLimiter';
 
 const router = express.Router();
 
-router.post('/redeem', auth, redeemLimiter, redeemReward);
+router.post('/redeem/:id', auth, redeemLimiter, redeemReward);
 
 router.get('/history', auth, getTransactionHistory);
 

@@ -66,7 +66,7 @@ export const RewardDetails = () => {
             const response = await transactionApi.redeemReward(reward._id);
             
             if (updatePoints) {
-                updatePoints(response.data.user.points);
+                updatePoints(response.data.userPoints);
             }
             
             toast.success('Reward redeemed successfully!');

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { UserMenu } from './UserMenu';
 import { useAuth } from '../context/AuthContext';
 import { FiBook } from 'react-icons/fi';
+import { Logo } from './Logo';
 
 export const Navbar = () => {
     const { isAuthenticated, user } = useAuth();
@@ -10,12 +11,7 @@ export const Navbar = () => {
         <nav className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo and Title */}
-                    <Link to="/" className="flex items-center space-x-2">
-                        <span className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                            reX
-                        </span>
-                    </Link>
+                    <Logo />
 
                     {/* Navigation Links */}
                     <div className="hidden sm:flex items-center space-x-4">
