@@ -1,28 +1,59 @@
-import { AuthProvider } from './context/AuthContext';
-import { DarkModeProvider } from './context/DarkModeContext';
-import { AppRoutes } from './routes/index';
-import { Navbar } from './components/Navbar';
-import { Sidebar } from './components/Sidebar';
-import { BrowserRouter } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import Documentation from './pages/Documentation';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Home } from './pages/Home';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { Profile } from './pages/Profile';
+import { CreateReward } from './pages/CreateReward';
+import { MyRewards } from './pages/MyRewards';
+import { RewardDetails } from './pages/RewardDetails';
+import { EditReward } from './pages/EditReward';
+import { Documentation } from './pages/Documentation';
+import { TransactionHistory } from './pages/TransactionHistory';
+import { NotFound } from './pages/NotFound';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
-const App = () => (
-  <BrowserRouter>
-    <DarkModeProvider>
-      <AuthProvider>
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 
-                      dark:from-secondary-900 dark:to-primary-900">
-          <Navbar />
-          <Sidebar />
-          <Toaster position="top-right" />
-          <main className="ml-12 py-6">
-            <AppRoutes />
-          </main>
-        </div>
-      </AuthProvider>
-    </DarkModeProvider>
-  </BrowserRouter>
-);
+function App() {
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/documentation" element={<Documentation />} />
+                <Route path="/rewards/:id" element={<RewardDetails />} />
+                
+                {/* Protected Routes */}
+                <Route path="/profile" element={
+                    <ProtectedRoute>
+                        <Profile />
+                    </ProtectedRoute>
+                } />
+                <Route path="/rewards/create" element={
+                    <ProtectedRoute>
+                        <CreateReward />
+                    </ProtectedRoute>
+                } />
+                <Route path="/rewards/:id/edit" element={
+                    <ProtectedRoute>
+                        <EditReward />
+                    </ProtectedRoute>
+                } />
+                <Route path="/my-rewards" element={
+                    <ProtectedRoute>
+                        <MyRewards />
+                    </ProtectedRoute>
+                } />
+                <Route path="/transactions" element={
+                    <ProtectedRoute>
+                        <TransactionHistory />
+                    </ProtectedRoute>
+                } />
+                
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
+            </Routes>
+        </Router>
+    );
+}
 
 export default App;

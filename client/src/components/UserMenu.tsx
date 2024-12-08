@@ -1,5 +1,5 @@
 import { useAuth } from '../context/AuthContext';
-import { FiUser, FiLogOut, FiGift } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiClock } from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
@@ -59,6 +59,19 @@ export const UserMenu = () => {
                         >
                             <FiUser className="w-4 h-4" />
                             Profile
+                        </Link>
+                    )}
+                </Menu.Item>
+                <Menu.Item>
+                    {({ active }) => (
+                        <Link
+                            to="/transactions"
+                            className={`${
+                                active ? 'bg-slate-50 dark:bg-slate-700' : ''
+                            } flex items-center gap-2 px-4 py-2 text-sm text-slate-700 dark:text-slate-200`}
+                        >
+                            <FiClock className="w-4 h-4" />
+                            Transaction History
                         </Link>
                     )}
                 </Menu.Item>
