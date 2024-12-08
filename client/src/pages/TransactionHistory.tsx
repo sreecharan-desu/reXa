@@ -38,6 +38,7 @@ export const TransactionHistory = () => {
                 setTransactions(response.data);
             } catch (error) {
                 toast.error('Failed to load transaction history');
+                console.error('Error fetching transactions:', error);
             } finally {
                 setLoading(false);
             }
@@ -47,56 +48,58 @@ export const TransactionHistory = () => {
     }, []);
 
     return (
-        <PageLayout title="Transaction History">
+        <PageLayout
+            title="Transaction History"
+            description="View your points transaction history"
+        >
             {loading ? (
-                <div className="flex justify-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
+                <div className="flex justify-center items-center h-64">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+                </div>
+            ) : transactions.length === 0 ? (
+                <div className="text-center py-12">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">No transactions yet</h3>
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        Start redeeming rewards to see your transaction history
+                    </p>
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {transactions.length === 0 ? (
-                        <div className="text-center py-12">
-                            <p className="text-gray-500 dark:text-gray-400">
-                                No transactions yet
-                            </p>
-                        </div>
-                    ) : (
-                        transactions.map((transaction) => (
-                            <motion.div
-                                key={transaction._id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6"
-                            >
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h3 className="font-semibold text-lg">
-                                            {transaction.reward.title}
-                                        </h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                            {format(new Date(transaction.createdAt), 'PPp')}
-                                        </p>
-                                    </div>
-                                    <div className={`px-3 py-1 rounded-full text-sm font-medium
-                                        ${transaction.fromUser._id === user?._id 
-                                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' 
-                                            : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                        }`}
-                                    >
-                                        {transaction.fromUser._id === user?._id ? '-' : '+'}
-                                        {transaction.points} points
-                                    </div>
+                    {transactions.map((transaction) => (
+                        <motion.div
+                            key={transaction._id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6"
+                        >
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="font-semibold text-lg">
+                                        {transaction.reward.title}
+                                    </h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {format(new Date(transaction.createdAt), 'PPp')}
+                                    </p>
                                 </div>
-                                <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">
-                                    {transaction.fromUser._id === user?._id ? (
-                                        <p>Redeemed by: {transaction.toUser.name}</p>
-                                    ) : (
-                                        <p>Received from: {transaction.fromUser.name}</p>
-                                    )}
+                                <div className={`px-3 py-1 rounded-full text-sm font-medium
+                                    ${transaction.fromUser._id === user?._id 
+                                        ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' 
+                                        : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    }`}
+                                >
+                                    {transaction.fromUser._id === user?._id ? '-' : '+'}
+                                    {transaction.points} points
                                 </div>
-                            </motion.div>
-                        ))
-                    )}
+                            </div>
+                            <div className="mt-4 text-sm text-gray-600 dark:text-gray-300">
+                                {transaction.fromUser._id === user?._id ? (
+                                    <p>Redeemed by: {transaction.toUser.name}</p>
+                                ) : (
+                                    <p>Received from: {transaction.fromUser.name}</p>
+                                )}
+                            </div>
+                        </motion.div>
+                    ))}
                 </div>
             )}
         </PageLayout>

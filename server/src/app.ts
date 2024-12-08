@@ -9,7 +9,7 @@ import authRoutes from './routes/auth.routes';
 import rewardRoutes from './routes/reward.routes';
 import categoryRoutes from './routes/category.routes';
 import requestRoutes from './routes/request.routes';
-const transactionRoutes = require('./routes/transaction.routes');
+import transactionRoutes from './routes/transaction.routes';
 
 const app = express();
 
@@ -49,8 +49,8 @@ app.get('/api/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/rewards', rewardRoutes);
-app.use('/api/categories', categoryRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/categories', categoryRoutes);
 app.use('/api/requests', requestRoutes);
 
 // Global Error Handler

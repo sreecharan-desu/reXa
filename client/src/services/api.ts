@@ -35,7 +35,7 @@ export const rewardApi = {
     create: (data: any) => axiosInstance.post('/rewards', data),
     update: (id: string, data: any) => axiosInstance.put(`/rewards/${id}`, data),
     delete: (id: string) => axiosInstance.delete(`/rewards/${id}`),
-    redeem: (rewardId: string) => axiosInstance.post(`/transactions/redeem`, { rewardId }),
+    redeem: (rewardId: string) => transactionApi.redeemReward(rewardId)
 };
 
 // Category endpoints
@@ -47,7 +47,6 @@ export const categoryApi = {
 
 // Transaction endpoints
 export const transactionApi = {
-    redeemReward: (rewardId: string) => 
-        axiosInstance.post('/transactions/redeem', { rewardId }),
-    getMyTransactions: () => axiosInstance.get('/transactions/history'),
+    getMyTransactions: () => axiosInstance.get('/api/transactions/history'),
+    redeemReward: (rewardId: string) => axiosInstance.post('/api/transactions/redeem', { rewardId })
 }; 
