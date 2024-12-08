@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -15,6 +16,23 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            window.location.href = '/signin';
+            toast.error('Session expired. Please sign in again.');
+        } else if (error.response?.status === 403) {
+            toast.error('You do not have permission to perform this action');
+        } else if (error.code === 'ERR_NETWORK') {
+            toast.error('Network error. Please check your connection.');
+        }
+        return Promise.reject(error);
+    }
+);
 
 // Auth endpoints
 export const authApi = {

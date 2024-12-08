@@ -20,10 +20,17 @@ app.use(hpp());
 
 // CORS Configuration
 app.use(cors({
-    origin: CONFIG.CORS_ORIGIN,
+    origin: (origin, callback) => {
+        if (!origin || CONFIG.CORS_ORIGIN.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
 
 app.use(express.json());
