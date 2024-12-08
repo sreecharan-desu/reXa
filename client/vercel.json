@@ -9,6 +9,6 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "env": {
-    "VITE_API_URL": "https://rex-api-tau.vercel.app/api"
+    "VITE_API_URL": "https://rex-api-two.vercel.app/api"
   }
 } 
