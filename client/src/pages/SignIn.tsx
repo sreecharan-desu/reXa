@@ -15,7 +15,6 @@ export const SignIn = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
-        // Basic validation
         if (!email.trim() || !password.trim()) {
             toast.error('Please fill in all fields');
             return;
@@ -26,12 +25,15 @@ export const SignIn = () => {
         try {
             await login(email, password);
             
-            // Get redirect URL from query params
+            // Get and validate redirect URL
             const params = new URLSearchParams(location.search);
             const redirectTo = params.get('redirect');
             
-            // Navigate to redirect URL or home
-            if (redirectTo && redirectTo !== '/signin') {
+            // Validate redirect path to prevent loops
+            if (redirectTo && 
+                redirectTo !== '/signin' && 
+                redirectTo !== '/register' && 
+                !redirectTo.includes('redirect=')) {
                 navigate(redirectTo);
             } else {
                 navigate('/');

@@ -26,24 +26,31 @@ api.interceptors.response.use(
             const errorCode = error.response?.data?.code;
             
             if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'TOKEN_MISSING') {
-                // Clear auth state
                 localStorage.removeItem('token');
                 
-                // Show different messages based on error type
                 if (errorCode === 'TOKEN_EXPIRED') {
                     toast.error('Your session has expired. Please sign in again.');
                 } else {
                     toast.error('Please sign in to continue.');
                 }
                 
-                // Fix redirect loop
+                // Get current path and check if it's already a signin page
                 const currentPath = window.location.pathname;
-                if (currentPath !== '/signin') {
-                    window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`;
-                } else {
-                    window.location.href = '/signin';
+                const currentSearch = window.location.search;
+                
+                // Prevent redirect loops
+                if (currentPath === '/signin') {
+                    return Promise.reject(error);
                 }
-                return Promise.reject(error);
+                
+                // Check if we're already handling a redirect
+                const searchParams = new URLSearchParams(currentSearch);
+                if (searchParams.has('redirect')) {
+                    return Promise.reject(error);
+                }
+                
+                // Redirect to signin with current path
+                window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`;
             }
         }
         
@@ -52,8 +59,6 @@ api.interceptors.response.use(
             toast.error('You do not have permission to perform this action');
         } else if (error.code === 'ERR_NETWORK') {
             toast.error('Network error. Please check your connection.');
-        } else if (!error.response) {
-            toast.error('An unexpected error occurred. Please try again.');
         }
         
         return Promise.reject(error);
