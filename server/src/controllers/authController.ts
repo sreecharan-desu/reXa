@@ -39,7 +39,7 @@ export const register = async (req: Request, res: Response) => {
         // Generate JWT token
         const token = jwt.sign(
             { userId: user._id },
-            JWT_CONFIG.secret,
+            JWT_CONFIG.secret || 'fallback-secret-key',
             { expiresIn: JWT_CONFIG.expiresIn }
         );
 

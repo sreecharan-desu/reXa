@@ -20,11 +20,11 @@ export const auth = async (req: AuthRequest, res: Response, next: NextFunction) 
     }
 
     try {
-      const decoded = jwt.verify(token, CONFIG.JWT_SECRET) as { userId: string };
+      const decoded = jwt.verify(token, CONFIG.JWT_SECRET as string) as { userId: string };
       req.user = { userId: decoded.userId };
       next();
-    } catch (jwtError) {
-      if (jwtError.name === 'TokenExpiredError') {
+    } catch (jwtError: any) {
+      if ((jwtError as { name: string }).name === 'TokenExpiredError') {
         return res.status(401).json({ 
           message: 'Token expired',
           code: 'TOKEN_EXPIRED'

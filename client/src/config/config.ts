@@ -1,5 +1,5 @@
 export const CONFIG = {
-    API_URL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+    API_URL: 'https://rex-api-two.vercel.app/api',
     APP_NAME: 'reX • Reward Exchange',
     TOKEN_KEY: 'rex_token',
 }; 

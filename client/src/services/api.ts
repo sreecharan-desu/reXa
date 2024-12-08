@@ -1,11 +1,14 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { CONFIG } from '../config/config';
 
 const api = axios.create({
-    baseURL: API_URL,
-    withCredentials: true
+    baseURL: CONFIG.API_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
 });
 
 // Add auth token to requests

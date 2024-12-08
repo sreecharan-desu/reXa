@@ -2,17 +2,28 @@ import app from './app';
 import mongoose from 'mongoose';
 import { CONFIG } from './config/config';
 
-const connectDB = async () => {
-    try {
-        await mongoose.connect(CONFIG.MONGODB_URI as string);
-        console.log('Connected to MongoDB Atlas');
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        process.exit(1);
-    }
-};
+const PORT = CONFIG.PORT || 5000;
 
 // Connect to MongoDB
-connectDB();
+mongoose.connect(CONFIG.MONGODB_URI!)
+    .then(() => {
+        console.log('Connected to MongoDB Atlas');
+        
+        // Start server after DB connection
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+            console.log(`Environment: ${CONFIG.NODE_ENV}`);
+        });
+    })
+    .catch((error) => {
+        console.error('MongoDB connection error:', error);
+        process.exit(1);
+    });
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (error: Error) => {
+    console.error('Unhandled Rejection:', error);
+    process.exit(1);
+});
 
 export default app;

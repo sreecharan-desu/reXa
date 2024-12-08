@@ -18,36 +18,33 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(hpp());
 
-// CORS Configuration
-app.use(cors({
-    origin: (origin, callback) => {
-        const allowedOrigins = [
-            'https://rex-beige.vercel.app',
-            'https://rex-beige.vercel.app/',
-            'http://localhost:3000'
-        ];
-        
+// Global CORS configuration
+const allowedOrigins = [
+    'https://rex-beige.vercel.app',    // Production frontend only
+    'https://rex-api-two.vercel.app'   // Production backend only
+];
+
+// CORS middleware configuration
+const corsOptions = {
+    origin: function (origin: string | undefined, callback: any) {
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            console.log('Blocked origin:', origin);
             callback(new Error('Not allowed by CORS'));
         }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Range', 'X-Content-Range']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range', 'Authorization']
+};
 
-// Specific CORS handling for transactions
-app.options('/api/transactions/redeem/:id', cors());
-app.use('/api/transactions/*', (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', 'https://rex-beige.vercel.app');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    next();
-});
+// Apply CORS before any other middleware
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 app.use(express.json());
 
@@ -76,12 +73,20 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/requests', requestRoutes);
 
-// Global Error Handler
+// Error handling middleware - place after routes
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.error('Error:', err);
+    console.error('Global error:', err);
+    
+    // Send CORS headers even for errors
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Credentials', 'true');
+    }
+    
     res.status(err.status || 500).json({
         message: err.message || 'Internal server error',
-        ...(CONFIG.NODE_ENV === 'development' && { stack: err.stack })
+        code: err.code || 'SERVER_ERROR'
     });
 });
 

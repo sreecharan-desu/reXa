@@ -1,5 +1,5 @@
 import { useAuth } from '../context/AuthContext';
-import { FiUser, FiLogOut, FiClock, FiGift, FiGift } from 'react-icons/fi';
+import { FiUser, FiLogOut, FiClock, FiGift} from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';

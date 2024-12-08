@@ -16,7 +16,10 @@ export const CONFIG = {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
     
     // CORS
-    CORS_ORIGIN: ['https://rex-beige.vercel.app', 'http://localhost:3000'],
+    CORS_ORIGIN: [
+        'https://rex-beige.vercel.app',    // Production frontend only
+        'https://rex-api-two.vercel.app'   // Production backend only
+    ],
     
     // Rate Limiting
     RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED === 'true',
