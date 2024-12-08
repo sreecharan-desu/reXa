@@ -26,9 +26,9 @@ export const Navbar = () => {
                         
                         {isAuthenticated ? (
                             <div className="flex items-center space-x-4">
-                                <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                {/* <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
                                     {user?.points} points
-                                </div>
+                                </div> */}
                                 <UserMenu />
                             </div>
                         ) : (

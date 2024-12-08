@@ -23,10 +23,12 @@ export const MyRewards = () => {
     const fetchMyRewards = async () => {
         try {
             const response = await rewardApi.getMyRewards();
-            setRewards(response.data);
+            const rewardsData = Array.isArray(response.data) ? response.data : response.data?.data || [];
+            setRewards(rewardsData);
         } catch (error) {
             console.error('Error fetching rewards:', error);
             toast.error('Failed to load your rewards');
+            setRewards([]);
         } finally {
             setLoading(false);
         }
@@ -72,46 +74,52 @@ export const MyRewards = () => {
     return (
         <PageLayout title="My Rewards">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {rewards.map(reward => (
-                    <div key={reward._id} 
-                        className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                {reward.title}
-                            </h3>
-                            <div className="flex gap-2">
-                                {reward.status === 'available' && (
+                {rewards && rewards.length > 0 ? (
+                    rewards.map((reward) => (
+                        <div key={reward._id} 
+                            className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+                            <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                    {reward.title}
+                                </h3>
+                                <div className="flex gap-2">
+                                    {reward.status === 'available' && (
+                                        <button
+                                            onClick={() => navigate(`/rewards/${reward._id}/edit`)}
+                                            className="p-2 text-gray-600 hover:text-cyan-500 
+                                                    dark:text-gray-400 dark:hover:text-cyan-400"
+                                        >
+                                            <FiEdit2 className="w-5 h-5" />
+                                        </button>
+                                    )}
                                     <button
-                                        onClick={() => navigate(`/rewards/${reward._id}/edit`)}
-                                        className="p-2 text-gray-600 hover:text-cyan-500 
-                                                dark:text-gray-400 dark:hover:text-cyan-400"
+                                        onClick={() => handleDelete(reward._id)}
+                                        className="p-2 text-gray-600 hover:text-red-500 
+                                                dark:text-gray-400 dark:hover:text-red-400"
                                     >
-                                        <FiEdit2 className="w-5 h-5" />
+                                        <FiTrash2 className="w-5 h-5" />
                                     </button>
-                                )}
-                                <button
-                                    onClick={() => handleDelete(reward._id)}
-                                    className="p-2 text-gray-600 hover:text-red-500 
-                                            dark:text-gray-400 dark:hover:text-red-400"
-                                >
-                                    <FiTrash2 className="w-5 h-5" />
-                                </button>
+                                </div>
+                            </div>
+                            <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                {reward.description}
+                            </p>
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="text-cyan-600 dark:text-cyan-400 font-medium">
+                                    {reward.points} points
+                                </span>
+                                <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 
+                                    rounded-full text-gray-600 dark:text-gray-400">
+                                    {reward.status}
+                                </span>
                             </div>
                         </div>
-                        <p className="text-gray-600 dark:text-gray-400 mb-4">
-                            {reward.description}
-                        </p>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-cyan-600 dark:text-cyan-400 font-medium">
-                                {reward.points} points
-                            </span>
-                            <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 
-                                rounded-full text-gray-600 dark:text-gray-400">
-                                {reward.status}
-                            </span>
-                        </div>
+                    ))
+                ) : (
+                    <div className="col-span-full text-center text-gray-500">
+                        No rewards found
                     </div>
-                ))}
+                )}
             </div>
         </PageLayout>
     );

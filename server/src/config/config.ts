@@ -2,6 +2,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 export const CONFIG = {
     // Server
     NODE_ENV: process.env.NODE_ENV || 'development',
@@ -16,10 +18,17 @@ export const CONFIG = {
     JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
     
     // CORS
-    CORS_ORIGIN: [
-        'https://rex-beige.vercel.app',    // Production frontend only
-        'https://rex-api-two.vercel.app'   // Production backend only
-    ],
+    CORS_ORIGIN: isDevelopment 
+        ? [
+            'http://localhost:5173',
+            'http://localhost:5000',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5000'
+          ]
+        : [
+            'https://rex-beige.vercel.app',
+            'https://rex-api-two.vercel.app'
+          ],
     
     // Rate Limiting
     RATE_LIMIT_ENABLED: process.env.RATE_LIMIT_ENABLED === 'true',

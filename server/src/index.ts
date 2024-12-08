@@ -1,6 +1,7 @@
 import app from './app';
 import mongoose from 'mongoose';
 import { CONFIG } from './config/config';
+import transactionRoutes from './routes/transaction.routes';
 
 const PORT = CONFIG.PORT || 5000;
 
@@ -25,5 +26,7 @@ process.on('unhandledRejection', (error: Error) => {
     console.error('Unhandled Rejection:', error);
     process.exit(1);
 });
+
+app.use('/api/transactions', transactionRoutes);
 
 export default app;

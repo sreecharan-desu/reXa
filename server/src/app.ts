@@ -20,13 +20,20 @@ app.use(hpp());
 
 // Global CORS configuration
 const allowedOrigins = [
-    'https://rex-beige.vercel.app',    // Production frontend only
-    'https://rex-api-two.vercel.app'   // Production backend only
+    // Production URLs
+    'https://rex-beige.vercel.app',    
+    'https://rex-api-two.vercel.app',   
+    // Local development URLs
+    'http://localhost:5173',           
+    'http://localhost:5000',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5000'
 ];
 
 // CORS middleware configuration
 const corsOptions = {
     origin: function (origin: string | undefined, callback: any) {
+        // Allow requests with no origin (like mobile apps, curl, postman)
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
@@ -36,7 +43,14 @@ const corsOptions = {
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+    allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'Origin', 
+        'Accept', 
+        'X-Requested-With',
+        'Access-Control-Allow-Headers'
+    ],
     exposedHeaders: ['Content-Range', 'X-Content-Range', 'Authorization']
 };
 

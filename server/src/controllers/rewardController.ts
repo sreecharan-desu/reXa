@@ -168,55 +168,85 @@ export const getRewardById = async (req: AuthRequest, res: Response) => {
 };
 
 export const redeemReward = async (req: AuthRequest, res: Response) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-    const reward = await Reward.findById(req.params.id)
-      .populate('owner', 'name email')
-      .populate('category');
+    console.log('Starting reward redemption process...');
+    const rewardId = req.params.id;
+    const userId = req.user?.userId;
 
+    console.log('RewardID:', rewardId);
+    console.log('UserID:', userId);
+
+    if (!userId) {
+      console.log('Authentication failed: No user ID');
+      return res.status(401).json({ message: 'User not authenticated' });
+    }
+
+    // Find the reward
+    const reward = await Reward.findById(rewardId);
     if (!reward) {
+      console.log('Reward not found:', rewardId);
       return res.status(404).json({ message: 'Reward not found' });
     }
 
-    // Check if reward is still available
-    if (reward.status !== 'available') {
-      return res.status(400).json({ message: 'Reward is no longer available' });
+    console.log('Found reward:', reward);
+
+    // Basic validations
+    if (reward.status !== 'available' || !reward.isActive) {
+      console.log('Reward not available:', { status: reward.status, isActive: reward.isActive });
+      return res.status(400).json({ message: 'Reward is not available' });
     }
 
-    // Get the redeeming user
-    const redeemingUser = await User.findById(req.user?.userId);
-    if (!redeemingUser) {
+    // Get both users
+    const [redeemingUser, ownerUser] = await Promise.all([
+      User.findById(userId),
+      User.findById(reward.owner)
+    ]);
+
+    console.log('Users found:', {
+      redeemingUser: redeemingUser?._id,
+      ownerUser: ownerUser?._id,
+      redeemingPoints: redeemingUser?.points,
+      rewardPoints: reward.points
+    });
+
+    if (!redeemingUser || !ownerUser) {
+      console.log('User not found:', { redeemingUser: !!redeemingUser, ownerUser: !!ownerUser });
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Get the reward owner
-    const ownerUser = await User.findById(reward.owner);
-    if (!ownerUser) {
-      return res.status(404).json({ message: 'Reward owner not found' });
-    }
-
-    // Prevent self-redemption
-    if (redeemingUser._id.toString() === ownerUser._id.toString()) {
-      return res.status(400).json({ message: 'Cannot redeem your own reward' });
-    }
-
-    // Check if user has enough points
     if (redeemingUser.points < reward.points) {
+      console.log('Insufficient points:', {
+        userPoints: redeemingUser.points,
+        requiredPoints: reward.points
+      });
       return res.status(400).json({ message: 'Insufficient points' });
     }
 
-    // Perform the points transaction
-    redeemingUser.points -= reward.points;
-    redeemingUser.redeemedRewards = (redeemingUser.redeemedRewards || 0) + 1;
-    ownerUser.points += reward.points;
+    console.log('Starting atomic updates...');
 
-    // Update reward status and redeemer
-    reward.status = 'redeemed';
-    reward.redeemedBy = redeemingUser._id;
-    reward.redeemedAt = new Date();
-    reward.isActive = false;
+    // Update all documents using findOneAndUpdate for atomic operations
+    const [updatedRedeemingUser, updatedOwnerUser, updatedReward] = await Promise.all([
+      User.findOneAndUpdate(
+        { _id: redeemingUser._id },
+        { $inc: { points: -reward.points } },
+        { new: true }
+      ),
+      User.findOneAndUpdate(
+        { _id: ownerUser._id },
+        { $inc: { points: reward.points } },
+        { new: true }
+      ),
+      Reward.findOneAndUpdate(
+        { _id: reward._id },
+        { 
+          status: 'redeemed',
+          redeemedBy: redeemingUser._id,
+          redeemedAt: new Date(),
+          isActive: false
+        },
+        { new: true }
+      )
+    ]);
 
     // Create transaction record
     const transaction = new Transaction({
@@ -227,32 +257,31 @@ export const redeemReward = async (req: AuthRequest, res: Response) => {
       type: 'redemption'
     });
 
-    // Save all changes within the transaction
-    await redeemingUser.save({ session });
-    await ownerUser.save({ session });
-    await reward.save({ session });
-    await transaction.save({ session });
+    await transaction.save();
+    console.log('Transaction created:', transaction._id);
 
-    await session.commitTransaction();
-
-    res.json({
-      message: 'Reward redeemed successfully',
-      userPoints: redeemingUser.points,
-      redeemedRewards: redeemingUser.redeemedRewards,
-      reward,
-      transaction: {
-        id: transaction._id,
-        points: transaction.points,
-        timestamp: transaction.createdAt
+    res.json({ 
+      message: 'Success', 
+      userPoints: updatedRedeemingUser?.points,
+      reward: {
+        id: updatedReward?._id,
+        title: updatedReward?.title,
+        status: updatedReward?.status
       }
     });
 
-  } catch (error) {
-    await session.abortTransaction();
-    console.error('Redeem error:', error);
-    res.status(500).json({ message: 'Error redeeming reward' });
-  } finally {
-    session.endSession();
+    console.log('Response sent successfully');
+
+  } catch (error: any) {
+    console.error('Redemption error:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({ 
+      message: 'Failed to redeem reward',
+      error: error.message 
+    });
   }
 };
 

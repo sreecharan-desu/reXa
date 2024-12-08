@@ -68,23 +68,33 @@ export const RewardCard = ({ reward, onUpdate }: RewardCardProps) => {
     };
 
     const handleConfirmRedeem = async () => {
+        if (!reward) return false;
+        
+        console.log('Starting redemption for reward:', reward._id);
         try {
             setIsRedeeming(true);
+            console.log('Making API call to redeem...');
             const response = await transactionApi.redeemReward(reward._id);
+            console.log('Redemption response:', response.data);
             
-            if (response.data.user?.points !== undefined) {
-                updatePoints(response.data.user.points);
+            if (response.data.userPoints !== undefined) {
+                updatePoints(response.data.userPoints);
+                toast.success('Reward redeemed successfully!');
+                if (onUpdate) {
+                    console.log('Updating rewards list...');
+                    onUpdate();
+                }
+                setIsDialogOpen(false);
                 return true;
             }
+            console.log('Invalid response format:', response.data);
+            toast.error('Invalid response from server');
+            return false;
         } catch (error: any) {
+            console.error('Redemption error:', error);
+            console.error('Response:', error.response?.data);
             const errorMessage = error.response?.data?.message || 'Failed to redeem reward';
             toast.error(errorMessage);
-            
-            if (errorMessage === 'Insufficient points') {
-                setTimeout(() => {
-                    navigate('/profile');
-                }, 2000);
-            }
             return false;
         } finally {
             setIsRedeeming(false);

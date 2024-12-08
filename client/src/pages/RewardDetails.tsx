@@ -61,6 +61,8 @@ export const RewardDetails = () => {
     };
 
     const handleRedeem = async () => {
+        if (!reward) return;
+        
         try {
             setLoading(true);
             const response = await transactionApi.redeemReward(reward._id);

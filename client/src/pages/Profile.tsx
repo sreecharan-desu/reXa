@@ -38,8 +38,11 @@ export const Profile = () => {
             }
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to load profile';
-            setError(errorMessage);
-            toast.error(errorMessage);
+            console.log(errorMessage);
+            // Only show error if user is authenticated (has token)
+            if (localStorage.getItem('token')) {
+                console.error('Profile fetch error:', err);
+            }
         } finally {
             setLoading(false);
         }
