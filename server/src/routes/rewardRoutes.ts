@@ -1,5 +1,5 @@
 import express from 'express';
-import { auth } from '../middleware/auth';
+import { auth, AuthRequest } from '../middleware/auth';
 import { 
     createReward, 
     getRewardById, 
@@ -13,15 +13,18 @@ import {
 
 const router = express.Router();
 
+// Protected routes
+router.use(auth);
+router.get('/user/my-rewards', getMyRewards);
+
 // Public routes
 router.get('/', getAllAvailableRewards);
 router.get('/:id', getRewardById);
 
-// Protected routes
-router.post('/', auth, createReward);
-router.get('/user/my-rewards', auth, getMyRewards);
-router.put('/:id', auth, updateReward);
-router.delete('/:id', auth, deleteReward);
-router.post('/:id/redeem', auth, redeemReward);
+// Other protected routes
+router.post('/', createReward);
+router.put('/:id', updateReward);
+router.delete('/:id', deleteReward);
+router.post('/:id/redeem', redeemReward);
 
 export default router; 

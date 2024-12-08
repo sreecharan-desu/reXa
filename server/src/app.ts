@@ -6,7 +6,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import hpp from 'hpp';
 import { CONFIG } from './config/config';
 import authRoutes from './routes/auth.routes';
-import rewardRoutes from './routes/reward.routes';
+import rewardRoutes from './routes/rewardRoutes';
 import categoryRoutes from './routes/category.routes';
 import requestRoutes from './routes/request.routes';
 import transactionRoutes from './routes/transaction.routes';

@@ -27,18 +27,52 @@ export const getAllRewards = async (req: Request, res: Response) => {
 
 export const getMyRewards = async (req: AuthRequest, res: Response) => {
     try {
-        if (!req.user?.userId) {
+        const userId = req.user?.userId;
+        console.log('Attempting to fetch rewards for userId:', userId);
+        
+        if (!userId) {
+            console.log('No userId found in request');
             return res.status(401).json({ message: 'User not authenticated' });
         }
 
-        const rewards = await Reward.find({ owner: req.user.userId })
-            .populate('category')
-            .exec();
+        // Log the query we're about to make
+        console.log('Querying rewards with owner:', userId);
 
-        res.json(rewards);
+        // Find rewards where user is the owner
+        const rewards = await Reward.find({ owner: userId })
+            .populate('owner', 'name email')
+            .populate('category', 'name')
+            .sort({ createdAt: -1 })
+            .lean(); // Add lean() for better performance
+
+        console.log('Raw rewards found:', rewards);
+        console.log(`Found ${rewards.length} rewards owned by user ${userId}`);
+        
+        // Check the structure of each reward
+        rewards.forEach((reward, index) => {
+            console.log(`Reward ${index + 1}:`, {
+                id: reward._id,
+                title: reward.title,
+                owner: reward.owner
+            });
+        });
+
+        res.json({
+            data: rewards,
+            message: 'Rewards retrieved successfully'
+        });
+
     } catch (error: any) {
-        console.error('Error in getMyRewards:', error);
-        res.status(500).json({ message: 'Failed to fetch rewards' });
+        console.error('Error fetching my rewards:', error);
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+        });
+        res.status(500).json({ 
+            message: 'Failed to fetch rewards',
+            error: error.message 
+        });
     }
 };
 
@@ -168,121 +202,94 @@ export const getRewardById = async (req: AuthRequest, res: Response) => {
 };
 
 export const redeemReward = async (req: AuthRequest, res: Response) => {
-  try {
-    console.log('Starting reward redemption process...');
-    const rewardId = req.params.id;
-    const userId = req.user?.userId;
+    try {
+        const rewardId = req.params.id;
+        const redeemingUserId = req.user?.userId;
 
-    console.log('RewardID:', rewardId);
-    console.log('UserID:', userId);
+        if (!redeemingUserId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
 
-    if (!userId) {
-      console.log('Authentication failed: No user ID');
-      return res.status(401).json({ message: 'User not authenticated' });
+        const reward = await Reward.findById(rewardId);
+        if (!reward) {
+            return res.status(404).json({ message: 'Reward not found' });
+        }
+
+        const [redeemingUser, ownerUser] = await Promise.all([
+            User.findById(redeemingUserId),
+            User.findById(reward.owner)
+        ]);
+
+        if (!redeemingUser || !ownerUser) {
+            console.log('User not found:', { redeemingUser: !!redeemingUser, ownerUser: !!ownerUser });
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (redeemingUser.points < reward.points) {
+            console.log('Insufficient points:', {
+                userPoints: redeemingUser.points,
+                requiredPoints: reward.points
+            });
+            return res.status(400).json({ message: 'Insufficient points' });
+        }
+
+        console.log('Starting atomic updates...');
+
+        // Update all documents using findOneAndUpdate for atomic operations
+        const [updatedRedeemingUser, updatedOwnerUser, updatedReward] = await Promise.all([
+            User.findOneAndUpdate(
+                { _id: redeemingUser._id },
+                { 
+                    $inc: { 
+                        points: -reward.points,
+                        redeemedRewards: 1  // Increment redeemedRewards count
+                    } 
+                },
+                { new: true }
+            ),
+            User.findOneAndUpdate(
+                { _id: ownerUser._id },
+                { $inc: { points: reward.points } },
+                { new: true }
+            ),
+            Reward.findOneAndUpdate(
+                { _id: reward._id },
+                { 
+                    status: 'redeemed',
+                    redeemedBy: redeemingUser._id,
+                    redeemedAt: new Date(),
+                    isActive: false
+                },
+                { new: true }
+            )
+        ]);
+
+        // Create transaction record
+        const transaction = new Transaction({
+            fromUser: redeemingUser._id,
+            toUser: ownerUser._id,
+            points: reward.points,
+            reward: reward._id,
+            type: 'redemption'
+        });
+
+        await transaction.save();
+
+        res.json({
+            message: 'Reward redeemed successfully',
+            transaction,
+            updatedRedeemingUser,
+            updatedOwnerUser,
+            updatedReward
+        });
+
+    } catch (error: any) {
+        console.error('Error redeeming reward:', error);
+        res.status(500).json({ 
+            message: 'Failed to redeem reward',
+            error: error.message 
+        });
     }
-
-    // Find the reward
-    const reward = await Reward.findById(rewardId);
-    if (!reward) {
-      console.log('Reward not found:', rewardId);
-      return res.status(404).json({ message: 'Reward not found' });
-    }
-
-    console.log('Found reward:', reward);
-
-    // Basic validations
-    if (reward.status !== 'available' || !reward.isActive) {
-      console.log('Reward not available:', { status: reward.status, isActive: reward.isActive });
-      return res.status(400).json({ message: 'Reward is not available' });
-    }
-
-    // Get both users
-    const [redeemingUser, ownerUser] = await Promise.all([
-      User.findById(userId),
-      User.findById(reward.owner)
-    ]);
-
-    console.log('Users found:', {
-      redeemingUser: redeemingUser?._id,
-      ownerUser: ownerUser?._id,
-      redeemingPoints: redeemingUser?.points,
-      rewardPoints: reward.points
-    });
-
-    if (!redeemingUser || !ownerUser) {
-      console.log('User not found:', { redeemingUser: !!redeemingUser, ownerUser: !!ownerUser });
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (redeemingUser.points < reward.points) {
-      console.log('Insufficient points:', {
-        userPoints: redeemingUser.points,
-        requiredPoints: reward.points
-      });
-      return res.status(400).json({ message: 'Insufficient points' });
-    }
-
-    console.log('Starting atomic updates...');
-
-    // Update all documents using findOneAndUpdate for atomic operations
-    const [updatedRedeemingUser, updatedOwnerUser, updatedReward] = await Promise.all([
-      User.findOneAndUpdate(
-        { _id: redeemingUser._id },
-        { $inc: { points: -reward.points } },
-        { new: true }
-      ),
-      User.findOneAndUpdate(
-        { _id: ownerUser._id },
-        { $inc: { points: reward.points } },
-        { new: true }
-      ),
-      Reward.findOneAndUpdate(
-        { _id: reward._id },
-        { 
-          status: 'redeemed',
-          redeemedBy: redeemingUser._id,
-          redeemedAt: new Date(),
-          isActive: false
-        },
-        { new: true }
-      )
-    ]);
-
-    // Create transaction record
-    const transaction = new Transaction({
-      fromUser: redeemingUser._id,
-      toUser: ownerUser._id,
-      points: reward.points,
-      reward: reward._id,
-      type: 'redemption'
-    });
-
-    await transaction.save();
-    console.log('Transaction created:', transaction._id);
-
-    res.json({ 
-      message: 'Success', 
-      userPoints: updatedRedeemingUser?.points,
-      reward: {
-        id: updatedReward?._id,
-        title: updatedReward?.title,
-        status: updatedReward?.status
-      }
-    });
-
-    console.log('Response sent successfully');
-
-  } catch (error: any) {
-    console.error('Redemption error:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
-    });
-    res.status(500).json({ 
-      message: 'Failed to redeem reward',
-      error: error.message 
-    });
-  }
 };
 
 export const updateReward = async (req: AuthRequest, res: Response) => {

@@ -3,6 +3,7 @@ import { transactionApi } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { format } from 'date-fns';
 import { FiGift, FiClock, FiUser, FiHash } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
 
 interface Transaction {
     _id: string;
@@ -20,6 +21,7 @@ interface Transaction {
 }
 
 export const TransactionHistory = () => {
+    const { user } = useAuth();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -99,8 +101,8 @@ export const TransactionHistory = () => {
                                         <div className="mt-3 flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                                             <FiUser className="text-gray-400" />
                                             <span>
-                                                From <span className="font-medium">{transaction.fromUser.name}</span> to{' '}
-                                                <span className="font-medium">{transaction.toUser.name}</span>
+                                                From <span className="font-medium">{transaction.fromUser._id === user?._id ? 'You' : transaction.fromUser.name}</span> to{' '}
+                                                <span className="font-medium">{transaction.toUser._id === user?._id ? 'You' : transaction.toUser.name}</span>
                                             </span>
                                         </div>
                                     </div>
