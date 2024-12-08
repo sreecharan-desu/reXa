@@ -21,7 +21,13 @@ app.use(hpp());
 // CORS Configuration
 app.use(cors({
     origin: (origin, callback) => {
-        if (!origin || CONFIG.CORS_ORIGIN.includes(origin)) {
+        const allowedOrigins = [
+            'https://rex-beige.vercel.app',
+            'https://rex-beige.vercel.app/',
+            'http://localhost:3000'
+        ];
+        
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
@@ -32,6 +38,16 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization'],
     exposedHeaders: ['Content-Range', 'X-Content-Range']
 }));
+
+// Specific CORS handling for transactions
+app.options('/api/transactions/redeem/:id', cors());
+app.use('/api/transactions/*', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', 'https://rex-beige.vercel.app');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 
 app.use(express.json());
 
