@@ -9,6 +9,7 @@ import { MyRewards } from '../pages/MyRewards';
 import { EditReward } from '../pages/EditReward';
 import { useAuth } from '../context/AuthContext';
 import Documentation from '../pages/Documentation';
+import { TransactionHistory } from '../pages/TransactionHistory';
 
 export const AppRoutes = () => {
     const { isAuthenticated } = useAuth();
@@ -40,6 +41,14 @@ export const AppRoutes = () => {
             <Route 
                 path="/my-rewards" 
                 element={isAuthenticated ? <MyRewards /> : <Navigate to="/signin" />} 
+            />
+            <Route 
+                path="/transactions" 
+                element={
+                    <ProtectedRoute>
+                        <TransactionHistory />
+                    </ProtectedRoute>
+                } 
             />
             
             {/* 404 Route */}

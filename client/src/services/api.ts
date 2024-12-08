@@ -49,4 +49,5 @@ export const categoryApi = {
 export const transactionApi = {
     redeemReward: (rewardId: string) => 
         axiosInstance.post('/transactions/redeem', { rewardId }),
+    getMyTransactions: () => axiosInstance.get('/transactions/history'),
 }; 
