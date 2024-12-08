@@ -21,15 +21,37 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     (response) => response,
     (error) => {
+        // Handle token expiration
         if (error.response?.status === 401) {
-            localStorage.removeItem('token');
-            window.location.href = '/signin';
-            toast.error('Session expired. Please sign in again.');
-        } else if (error.response?.status === 403) {
+            const errorCode = error.response?.data?.code;
+            
+            if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'TOKEN_MISSING') {
+                // Clear auth state
+                localStorage.removeItem('token');
+                
+                // Show different messages based on error type
+                if (errorCode === 'TOKEN_EXPIRED') {
+                    toast.error('Your session has expired. Please sign in again.');
+                } else {
+                    toast.error('Please sign in to continue.');
+                }
+                
+                // Redirect to login page with return URL
+                const currentPath = window.location.pathname;
+                window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`;
+                return Promise.reject(error);
+            }
+        }
+        
+        // Handle other errors
+        if (error.response?.status === 403) {
             toast.error('You do not have permission to perform this action');
         } else if (error.code === 'ERR_NETWORK') {
             toast.error('Network error. Please check your connection.');
+        } else if (!error.response) {
+            toast.error('An unexpected error occurred. Please try again.');
         }
+        
         return Promise.reject(error);
     }
 );

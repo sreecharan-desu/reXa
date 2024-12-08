@@ -83,7 +83,9 @@ export const login = async (req: Request, res: Response) => {
         const token = jwt.sign(
             { userId: user._id },
             CONFIG.JWT_SECRET!,
-            { expiresIn: CONFIG.JWT_EXPIRES_IN }
+            { 
+                expiresIn: '30d' // Extend token validity to 30 days
+            }
         );
 
         res.json({
