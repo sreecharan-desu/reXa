@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { AppRoutes } from './routes';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
+import { Analytics } from "@vercel/analytics/react"
 
 function App() {
     return (
