@@ -36,9 +36,13 @@ api.interceptors.response.use(
                     toast.error('Please sign in to continue.');
                 }
                 
-                // Redirect to login page with return URL
+                // Fix redirect loop
                 const currentPath = window.location.pathname;
-                window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`;
+                if (currentPath !== '/signin') {
+                    window.location.href = `/signin?redirect=${encodeURIComponent(currentPath)}`;
+                } else {
+                    window.location.href = '/signin';
+                }
                 return Promise.reject(error);
             }
         }

@@ -26,26 +26,20 @@ export const SignIn = () => {
         try {
             await login(email, password);
             
-            // Get redirect path or default to home
-            const from = (location.state as any)?.from || '/';
-            toast.success('Welcome back!');
-            navigate(from);
-        } catch (error: any) {
-            const errorMessage = error.response?.data?.message;
+            // Get redirect URL from query params
+            const params = new URLSearchParams(location.search);
+            const redirectTo = params.get('redirect');
             
-            // Handle specific error cases
-            switch (errorMessage) {
-                case 'Invalid credentials':
-                    toast.error('Invalid email or password');
-                    break;
-                case 'User not found':
-                    toast.error('No account found with this email');
-                    break;
-                default:
-                    toast.error('Failed to sign in. Please try again.');
+            // Navigate to redirect URL or home
+            if (redirectTo && redirectTo !== '/signin') {
+                navigate(redirectTo);
+            } else {
+                navigate('/');
             }
             
-            console.error('Login error:', error);
+            toast.success('Welcome back!');
+        } catch (error: any) {
+            toast.error(error.response?.data?.message || 'Failed to sign in');
         } finally {
             setIsLoading(false);
         }
