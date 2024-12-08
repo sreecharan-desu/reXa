@@ -216,6 +216,205 @@ NODE_ENV=development`} />
                         </div>
                     </div>
                 </Section>
+
+                {/* Architecture Deep Dive */}
+                <Section icon={FiServer} title="Architecture Deep Dive 🏗️">
+                    <div className="space-y-6 text-gray-600 dark:text-gray-300">
+                        <div>
+                            <h3 className="text-xl font-medium mb-3">System Architecture</h3>
+                            <div className="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
+                                <CodeBlock code={`
+Frontend (React + TypeScript)
+    ├── Components/
+    │   ├── Shared UI Components
+    │   └── Feature-specific Components
+    ├── Pages/
+    │   └── Route Components
+    ├── Context/
+    │   └── Global State Management
+    ├── Services/
+    │   └── API Integration
+    └── Utils/
+        └── Helper Functions
+
+Backend (Node.js + Express)
+    ├── Controllers/
+    │   └── Business Logic
+    ├── Models/
+    │   └── Data Schemas
+    ├── Routes/
+    │   └── API Endpoints
+    ├── Middleware/
+    │   └── Request Processing
+    └── Utils/
+        └── Helper Functions`} />
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="text-xl font-medium mb-3">State Management</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Client State</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>React Context API</li>
+                                        <li>Local Component State</li>
+                                        <li>Form State Management</li>
+                                        <li>UI State Persistence</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Server State</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>MongoDB Collections</li>
+                                        <li>Session Management</li>
+                                        <li>Cache Strategies</li>
+                                        <li>Real-time Updates</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Section>
+
+                {/* Security Implementation */}
+                <Section icon={FiShield} title="Security Implementation 🔒">
+                    <div className="space-y-6 text-gray-600 dark:text-gray-300">
+                        <div>
+                            <h3 className="text-xl font-medium mb-3">Authentication Flow</h3>
+                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg space-y-4">
+                                <CodeBlock code={`
+1. User submits credentials
+2. Server validates credentials
+3. JWT token generated
+4. Token stored in HTTP-only cookie
+5. Client includes cookie in requests
+6. Server validates token on protected routes`} />
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="text-xl font-medium mb-3">Security Measures</h3>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">API Security</h4>
+                                    <ul className="space-y-1 text-sm">
+                                        <li>• Rate Limiting</li>
+                                        <li>• CORS Configuration</li>
+                                        <li>• Input Validation</li>
+                                        <li>• Request Sanitization</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Data Security</h4>
+                                    <ul className="space-y-1 text-sm">
+                                        <li>• Password Hashing</li>
+                                        <li>• Data Encryption</li>
+                                        <li>• Secure Headers</li>
+                                        <li>• XSS Prevention</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Infrastructure</h4>
+                                    <ul className="space-y-1 text-sm">
+                                        <li>• SSL/TLS</li>
+                                        <li>• DDoS Protection</li>
+                                        <li>• Regular Backups</li>
+                                        <li>• Monitoring</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Section>
+
+                {/* Performance Optimization */}
+                <Section icon={FiRefreshCw} title="Performance Optimization ⚡">
+                    <div className="space-y-6 text-gray-600 dark:text-gray-300">
+                        <div>
+                            <h3 className="text-xl font-medium mb-3">Frontend Optimization</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Code Optimization</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>Code splitting</li>
+                                        <li>Lazy loading</li>
+                                        <li>Tree shaking</li>
+                                        <li>Bundle optimization</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Runtime Optimization</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>Memoization</li>
+                                        <li>Virtual scrolling</li>
+                                        <li>Image optimization</li>
+                                        <li>Debouncing/Throttling</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="text-xl font-medium mb-3">Backend Optimization</h3>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">Database</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>Indexing strategies</li>
+                                        <li>Query optimization</li>
+                                        <li>Connection pooling</li>
+                                        <li>Caching layer</li>
+                                    </ul>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                    <h4 className="font-medium mb-2">API</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li>Response compression</li>
+                                        <li>Pagination</li>
+                                        <li>Batch operations</li>
+                                        <li>Cache headers</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Section>
+
+                {/* Testing Strategy */}
+                <Section icon={FiTool} title="Testing Strategy 🧪">
+                    <div className="space-y-6 text-gray-600 dark:text-gray-300">
+                        <div className="grid md:grid-cols-3 gap-4">
+                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <h4 className="font-medium mb-2">Unit Tests</h4>
+                                <ul className="space-y-1 text-sm">
+                                    <li>• Jest</li>
+                                    <li>• React Testing Library</li>
+                                    <li>• Component Testing</li>
+                                    <li>• Utility Functions</li>
+                                </ul>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <h4 className="font-medium mb-2">Integration Tests</h4>
+                                <ul className="space-y-1 text-sm">
+                                    <li>• API Testing</li>
+                                    <li>• Database Operations</li>
+                                    <li>• Authentication Flow</li>
+                                    <li>• Business Logic</li>
+                                </ul>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                                <h4 className="font-medium mb-2">E2E Tests</h4>
+                                <ul className="space-y-1 text-sm">
+                                    <li>• Cypress</li>
+                                    <li>• User Flows</li>
+                                    <li>• Critical Paths</li>
+                                    <li>• Cross-browser Testing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </Section>
             </motion.div>
         </div>
     );
