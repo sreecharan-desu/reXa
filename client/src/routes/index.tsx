@@ -10,6 +10,7 @@ import { EditReward } from '../pages/EditReward';
 import { useAuth } from '../context/AuthContext';
 import Documentation from '../pages/Documentation';
 import { TransactionHistory } from '../pages/TransactionHistory';
+import { ProtectedRoute } from '../components/ProtectedRoute';
 
 export const AppRoutes = () => {
     const { isAuthenticated } = useAuth();
@@ -24,23 +25,43 @@ export const AppRoutes = () => {
             {/* Protected Routes */}
             <Route 
                 path="/profile" 
-                element={isAuthenticated ? <Profile /> : <Navigate to="/signin" />} 
+                element={
+                    <ProtectedRoute>
+                        <Profile />
+                    </ProtectedRoute>
+                } 
             />
             <Route 
                 path="/rewards/create" 
-                element={isAuthenticated ? <CreateReward /> : <Navigate to="/signin" />} 
+                element={
+                    <ProtectedRoute>
+                        <CreateReward />
+                    </ProtectedRoute>
+                } 
             />
             <Route 
                 path="/rewards/:id" 
-                element={isAuthenticated ? <RewardDetails /> : <Navigate to="/signin" />} 
+                element={
+                    <ProtectedRoute>
+                        <RewardDetails />
+                    </ProtectedRoute>
+                } 
             />
             <Route 
                 path="/rewards/:id/edit" 
-                element={isAuthenticated ? <EditReward /> : <Navigate to="/signin" />} 
+                element={
+                    <ProtectedRoute>
+                        <EditReward />
+                    </ProtectedRoute>
+                } 
             />
             <Route 
                 path="/my-rewards" 
-                element={isAuthenticated ? <MyRewards /> : <Navigate to="/signin" />} 
+                element={
+                    <ProtectedRoute>
+                        <MyRewards />
+                    </ProtectedRoute>
+                } 
             />
             <Route 
                 path="/transactions" 
