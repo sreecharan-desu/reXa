@@ -48,10 +48,21 @@ export const TransactionHistory = () => {
                                     <p className="text-sm text-gray-500">
                                         From {transaction.fromUser.name} to {transaction.toUser.name}
                                     </p>
+                                    <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Reward Code:</p>
+                                        <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded">
+                                            {transaction.reward.code}
+                                        </code>
+                                    </div>
+                                    {transaction.reward.description && (
+                                        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                                            {transaction.reward.description}
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="text-right">
                                     <p className="font-medium text-cyan-600">
-                                        {transaction.points} points
+                                        {transaction.reward.points} points
                                     </p>
                                     <p className="text-xs text-gray-500">
                                         {format(new Date(transaction.createdAt), 'MMM d, yyyy')}

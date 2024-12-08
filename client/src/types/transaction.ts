@@ -13,6 +13,8 @@ export interface Transaction {
         _id: string;
         title: string;
         points: number;
+        code: string;
+        description?: string;
     };
     type: 'redemption';
     createdAt: string;

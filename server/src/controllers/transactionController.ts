@@ -17,7 +17,7 @@ export const getTransactionHistory = async (req: AuthRequest, res: Response) => 
                 { toUser: userId }
             ]
         })
-        .populate('reward', 'title points')
+        .populate('reward', 'title points code description')
         .populate('fromUser', 'name')
         .populate('toUser', 'name')
         .sort({ createdAt: -1 })
