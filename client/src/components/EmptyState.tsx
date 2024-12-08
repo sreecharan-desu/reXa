@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { FiGift } from 'react-icons/fi';
+import { FiGift, FiPlus } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,14 +24,16 @@ export const EmptyState = () => {
                     ? "Be the first to create a reward!"
                     : "Sign in to create your first reward!"}
             </p>
-            <button
-                onClick={() => isAuthenticated ? navigate('/rewards/create') : navigate('/signin')}
-                className="mt-6 px-6 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500
-                    text-white font-medium hover:from-cyan-600 hover:to-blue-600
-                    transition-all duration-200"
-            >
-                {isAuthenticated ? 'Create Reward' : 'Sign In'}
-            </button>
+            <div className="mt-6">
+                <button
+                    onClick={() => isAuthenticated ? navigate('/rewards/create') : navigate('/signin')}
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-500
+                        text-white font-medium hover:from-cyan-600 hover:to-blue-600
+                        transition-all duration-200"
+                >
+                    {isAuthenticated ? 'Create Reward' : 'Sign In'}
+                </button>
+            </div>
         </motion.div>
     );
 }; 

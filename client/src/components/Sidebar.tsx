@@ -1,34 +1,36 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { FiHome, FiGift, FiClock, FiUser } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import { DarkModeToggle } from './DarkModeToggle';
 
 export const Sidebar = () => {
-    const { logout, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
+    const location = useLocation();
+    const { isAuthenticated } = useAuth();
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
+    const links = [
+        { path: '/', icon: FiHome, label: 'Home' },
+        { path: '/my-rewards', icon: FiGift, label: 'My Rewards', protected: true },
+        { path: '/transactions', icon: FiClock, label: 'Transactions', protected: true },
+        { path: '/profile', icon: FiUser, label: 'Profile', protected: true },
+    ];
 
     return (
-        <div className="fixed left-0 top-0 h-full w-12 bg-white dark:bg-gray-800 shadow-lg flex flex-col justify-between py-4">
-            <div /> {/* Spacer */}
-            <div className="flex flex-col items-center space-y-3">
-                <DarkModeToggle />
-                {isAuthenticated && (
-                    <button
-                        onClick={handleLogout}
-                        className="p-1.5 text-gray-700 dark:text-gray-200 hover:text-cyan-500 
-                                 dark:hover:text-cyan-400 transition-colors"
-                        title="Logout"
+        <aside className="hidden lg:flex flex-col gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+            {links.map((link) => (
+                (!link.protected || isAuthenticated) && (
+                    <Link
+                        key={link.path}
+                        to={link.path}
+                        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors
+                            ${location.pathname === link.path 
+                                ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' 
+                                : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
+                            }`}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
-                )}
-            </div>
-        </div>
+                        <link.icon className="w-5 h-5" />
+                        <span className="font-medium">{link.label}</span>
+                    </Link>
+                )
+            ))}
+        </aside>
     );
 }; 
