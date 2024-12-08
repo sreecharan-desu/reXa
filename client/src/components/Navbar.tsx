@@ -1,66 +1,64 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { UserMenu } from './UserMenu';
-import { FiUser } from 'react-icons/fi';
-import { Logo } from './Logo';
-import { ProfileIcon } from './ProfileIcon';
+import { useAuth } from '../context/AuthContext';
+import { FiBook } from 'react-icons/fi';
 
 export const Navbar = () => {
     const { isAuthenticated, user } = useAuth();
 
     return (
-        <nav className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-md sticky top-0 z-50 
-            border-b border-slate-200/80 dark:border-slate-800/80
-            shadow-sm shadow-slate-200/20 dark:shadow-slate-900/20">
+        <nav className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between items-center h-[4.5rem]">
-                    <Link 
-                        to="/" 
-                        className="flex items-center gap-2 transition-transform duration-200 hover:scale-[1.02]"
-                    >
-                        <Logo />
-                        <span className="text-xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 
-                            bg-clip-text text-transparent">
+                <div className="flex justify-between items-center h-16">
+                    {/* Logo and Title */}
+                    <Link to="/" className="flex items-center space-x-2">
+                        <span className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
                             reX
                         </span>
                     </Link>
-                    <Link 
-  to="/documentation" 
-  className="text-gray-600 hover:text-indigo-600"
->
-  API Docs
-</Link>
-                    <div className="flex items-center gap-6">
+
+                    {/* Navigation Links */}
+                    <div className="hidden sm:flex items-center space-x-4">
+                        <Link 
+                            to="/documentation"
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-cyan-600 
+                                     dark:text-gray-200 dark:hover:text-cyan-400 transition-colors"
+                        >
+                            <FiBook className="w-4 h-4" />
+                            <span>Docs</span>
+                        </Link>
+                        
                         {isAuthenticated ? (
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center">
-                                    <ProfileIcon name={user?.name || ''} />
+                            <div className="flex items-center space-x-4">
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {user?.points} points
                                 </div>
                                 <UserMenu />
                             </div>
                         ) : (
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center space-x-2">
                                 <Link
                                     to="/signin"
-                                    className="text-slate-600 hover:text-slate-900 dark:text-slate-300 
-                                        dark:hover:text-white transition-colors duration-200 
-                                        font-medium px-3 py-2 rounded-lg hover:bg-slate-100/50 
-                                        dark:hover:bg-slate-800/50"
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-cyan-600 
+                                             dark:text-gray-200 dark:hover:text-cyan-400 transition-colors"
                                 >
                                     Sign In
                                 </Link>
                                 <Link
                                     to="/register"
-                                    className="bg-gradient-to-r from-cyan-500 to-blue-500 
-                                        hover:from-cyan-600 hover:to-blue-600 text-white 
-                                        px-5 py-2 rounded-lg font-medium transition-all 
-                                        duration-200 hover:shadow-lg hover:shadow-cyan-500/20
-                                        active:scale-[0.98]"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r 
+                                             from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 
+                                             rounded-lg transition-colors"
                                 >
                                     Register
                                 </Link>
                             </div>
                         )}
+                    </div>
+
+                    {/* Mobile Menu */}
+                    <div className="sm:hidden">
+                        <UserMenu />
                     </div>
                 </div>
             </div>
