@@ -9,17 +9,17 @@ interface PageLayoutProps {
 
 export const PageLayout = ({ children, title, action }: PageLayoutProps) => {
     return (
-        <div className="min-h-screen pl-16">
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="min-h-screen pl-16 sm:pl-20 lg:pl-24">
+            <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 {(title || action) && (
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
                         {title && (
-                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                            <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white">
                                 {title}
                             </h1>
                         )}
                         {action && (
-                            <div className="flex-shrink-0">
+                            <div className="flex-shrink-0 w-full sm:w-auto">
                                 {action}
                             </div>
                         )}
