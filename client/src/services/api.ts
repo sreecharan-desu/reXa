@@ -45,5 +45,5 @@ export const categoryApi = {
 // Transaction endpoints
 export const transactionApi = {
     getMyTransactions: () => api.get('/transactions/history'),
-    redeemReward: (rewardId: string) => api.post(`/transactions/redeem/${rewardId}`),
+    redeemReward: (rewardId: string) => api.post('/transactions/redeem', { rewardId }),
 }; 
