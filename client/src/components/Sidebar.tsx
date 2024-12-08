@@ -1,36 +1,55 @@
-import { Link, useLocation } from 'react-router-dom';
-import { FiHome, FiGift, FiClock, FiUser } from 'react-icons/fi';
+import { FiHome, FiGift, FiUser, FiBook, FiLogOut } from 'react-icons/fi';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export const Sidebar = () => {
-    const location = useLocation();
-    const { isAuthenticated } = useAuth();
-
-    const links = [
-        { path: '/', icon: FiHome, label: 'Home' },
-        { path: '/my-rewards', icon: FiGift, label: 'My Rewards', protected: true },
-        { path: '/transactions', icon: FiClock, label: 'Transactions', protected: true },
-        { path: '/profile', icon: FiUser, label: 'Profile', protected: true },
-    ];
+    const { isAuthenticated, logout } = useAuth();
 
     return (
-        <aside className="hidden lg:flex flex-col gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-lg">
-            {links.map((link) => (
-                (!link.protected || isAuthenticated) && (
-                    <Link
-                        key={link.path}
-                        to={link.path}
-                        className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-colors
-                            ${location.pathname === link.path 
-                                ? 'bg-cyan-50 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' 
-                                : 'text-gray-600 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/50'
-                            }`}
-                    >
-                        <link.icon className="w-5 h-5" />
-                        <span className="font-medium">{link.label}</span>
-                    </Link>
-                )
-            ))}
+        <aside className="fixed left-0 top-0 h-screen w-16 flex flex-col items-center py-8 
+            bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
+            <NavLink to="/" 
+                className={({ isActive }) => `p-3 rounded-xl mb-4 transition-colors duration-200
+                    ${isActive ? 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10' : 
+                    'text-gray-500 hover:text-cyan-500 dark:text-gray-400 dark:hover:text-cyan-400'}`}>
+                <FiHome size={20} />
+            </NavLink>
+            
+            {isAuthenticated && (
+                <>
+                    <NavLink to="/my-rewards"
+                        className={({ isActive }) => `p-3 rounded-xl mb-4 transition-colors duration-200
+                            ${isActive ? 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10' : 
+                            'text-gray-500 hover:text-cyan-500 dark:text-gray-400 dark:hover:text-cyan-400'}`}>
+                        <FiGift size={20} />
+                    </NavLink>
+                    
+                    <NavLink to="/profile"
+                        className={({ isActive }) => `p-3 rounded-xl mb-4 transition-colors duration-200
+                            ${isActive ? 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10' : 
+                            'text-gray-500 hover:text-cyan-500 dark:text-gray-400 dark:hover:text-cyan-400'}`}>
+                        <FiUser size={20} />
+                    </NavLink>
+                </>
+            )}
+            
+            <NavLink to="/docs"
+                className={({ isActive }) => `p-3 rounded-xl mb-4 transition-colors duration-200
+                    ${isActive ? 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10' : 
+                    'text-gray-500 hover:text-cyan-500 dark:text-gray-400 dark:hover:text-cyan-400'}`}>
+                <FiBook size={20} />
+            </NavLink>
+
+            {/* Logout Button - Added at the bottom with margin-top:auto to push it to the bottom */}
+            {isAuthenticated && (
+                <button
+                    onClick={logout}
+                    className="p-3 rounded-xl mt-auto text-gray-500 hover:text-red-500 
+                        dark:text-gray-400 dark:hover:text-red-400 transition-colors duration-200"
+                    title="Logout">
+                    <FiLogOut size={20} />
+                </button>
+            )}
         </aside>
     );
 }; 
