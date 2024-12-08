@@ -4,7 +4,9 @@ import { useAuth } from '../context/AuthContext';
 
 export const Sidebar = () => {
     const { isAuthenticated, logout } = useAuth();
+ 
 
+    
     return (
         <aside className="fixed left-0 top-0 h-screen w-14 sm:w-16 lg:w-20 flex flex-col items-center py-6 sm:py-8 
             bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
