@@ -28,10 +28,9 @@ api.interceptors.response.use(
             if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'TOKEN_MISSING') {
                 localStorage.removeItem('token');
                 
+                // Only show toast for expired tokens
                 if (errorCode === 'TOKEN_EXPIRED') {
                     toast.error('Your session has expired. Please sign in again.');
-                } else {
-                    toast.error('Please sign in to continue.');
                 }
                 
                 // Get current path and check if it's already a signin page

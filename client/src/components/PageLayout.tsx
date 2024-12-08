@@ -2,27 +2,31 @@ import { ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 
 interface PageLayoutProps {
-    title: string;
-    description?: string;
-    children: ReactNode;
-    grid?: boolean;
+    children: React.ReactNode;
+    title?: string;
+    action?: React.ReactNode;
 }
 
-export const PageLayout = ({ title, description, children, grid }: PageLayoutProps) => {
+export const PageLayout = ({ children, title, action }: PageLayoutProps) => {
     return (
-        <div className="flex gap-6">
-            <Sidebar />
-            <div className="flex-1">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h1>
-                    {description && (
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
-                    )}
-                </div>
-                <div className={grid ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : ""}>
-                    {children}
-                </div>
-            </div>
+        <div className="min-h-screen pl-16">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                {(title || action) && (
+                    <div className="flex justify-between items-center mb-6">
+                        {title && (
+                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
+                                {title}
+                            </h1>
+                        )}
+                        {action && (
+                            <div className="flex-shrink-0">
+                                {action}
+                            </div>
+                        )}
+                    </div>
+                )}
+                {children}
+            </main>
         </div>
     );
 }; 
