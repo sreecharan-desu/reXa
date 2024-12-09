@@ -13,15 +13,13 @@ import {
 
 const router = express.Router();
 
-// Protected routes
-router.use(auth);
-router.get('/user/my-rewards', getMyRewards);
-
-// Public routes
+// Public routes (no auth required)
 router.get('/', getAllAvailableRewards);
 router.get('/:id', getRewardById);
 
-// Other protected routes
+// Protected routes (auth required)
+router.use(auth);
+router.get('/user/my-rewards', getMyRewards);
 router.post('/', createReward);
 router.put('/:id', updateReward);
 router.delete('/:id', deleteReward);
