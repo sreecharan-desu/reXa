@@ -68,15 +68,15 @@ export function Footer() {
     ];
 
     return (
-        <footer className="bg-black text-white py-6 mt-auto">
+        <footer className="bg-white text-gray-800 py-6 mt-auto border-t border-gray-200 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col items-center space-y-4">
                     {/* Logo and Copyright */}
                     <div className="text-center">
-                        <div className="font-bold text-xl mb-1">
+                        <div className="font-bold text-xl mb-1 text-blue-600">
                             reX
                         </div>
-                        <div className="text-gray-400 text-sm">
+                        <div className="text-gray-500 text-sm">
                             © {year} All rights reserved
                         </div>
                     </div>
@@ -89,7 +89,7 @@ export function Footer() {
                                 href={link.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-gray-400 hover:text-white transition-colors duration-300"
+                                className="text-gray-500 hover:text-blue-600 transition-colors duration-300"
                                 aria-label={link.name}
                             >
                                 {link.icon}
@@ -98,7 +98,7 @@ export function Footer() {
                     </div>
 
                     {/* Creator Credit */}
-                    <div className="text-gray-400 text-sm flex items-center space-x-1">
+                    <div className="text-gray-600 text-sm flex items-center space-x-1">
                         <span>Made with</span>
                         <span className="text-red-500 animate-pulse text-lg">♥</span>
                         <span>by</span>
@@ -106,7 +106,7 @@ export function Footer() {
                             href="https://github.com/sreecharan-desu"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium hover:text-white transition-colors duration-300"
+                            className="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-300"
                         >
                             SreeCharan
                         </a>
