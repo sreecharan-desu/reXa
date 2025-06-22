@@ -58,7 +58,7 @@ export function Footer() {
         },
         {
             name: 'Twitter',
-            url: 'https://x.com/sreecharandesu',
+            url: 'https://x.com/sr3x0r',
             icon: (
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
@@ -70,7 +70,7 @@ export function Footer() {
     return (
         <footer className="bg-white text-gray-800 py-6 mt-auto border-t border-gray-200 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col items-center space-y-4">
+                <div className="flex flex-row justify-between place-content-center items-center space-y-4">
                     {/* Logo and Copyright */}
                     <div className="text-center">
                         <div className="font-bold text-xl mb-1 text-blue-600">
@@ -80,6 +80,24 @@ export function Footer() {
                             © {year} All rights reserved
                         </div>
                     </div>
+
+
+                    {/* Creator Credit */}
+                    <div className="text-gray-600 text-sm flex flex-col gap-3 items-center space-x-1">
+                        <div>
+ <span>Made with </span>
+                        <span className="text-red-500 animate-pulse text-lg"> ♥ </span>
+                        <span>by </span>
+                        <a 
+                            href="https://github.com/sreecharan-desu"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-300"
+                        >
+                            SreeCharan
+                        </a>
+                        </div>
+                       
 
                     {/* Social Links */}
                     <div className="flex space-x-6">
@@ -96,20 +114,6 @@ export function Footer() {
                             </a>
                         ))}
                     </div>
-
-                    {/* Creator Credit */}
-                    <div className="text-gray-600 text-sm flex items-center space-x-1">
-                        <span>Made with</span>
-                        <span className="text-red-500 animate-pulse text-lg">♥</span>
-                        <span>by</span>
-                        <a 
-                            href="https://github.com/sreecharan-desu"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-300"
-                        >
-                            SreeCharan
-                        </a>
                     </div>
                 </div>
             </div>

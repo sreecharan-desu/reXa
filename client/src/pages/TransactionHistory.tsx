@@ -46,7 +46,7 @@ export const TransactionHistory = () => {
     if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-screen px-4 sm:px-6 lg:px-8 py-8">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                 Transaction History
             </h2>

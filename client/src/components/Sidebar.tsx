@@ -8,20 +8,21 @@ export const Sidebar = () => {
 
     
     return (
-        <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-14 sm:w-16 lg:w-20 
+        <aside className={`fixed ${isAuthenticated ? 'block' : 'hidden'} left-0 top-16 h-[calc(100vh-4rem)] w-14 sm:w-16 lg:w-20 
             flex flex-col items-center py-6 sm:py-8 
             bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
-            shadow-lg z-40">
-            <NavLink to="/" 
+            shadow-lg z-40`}>
+
+            
+            {isAuthenticated && (
+                <>
+                            <NavLink to="/" 
                 className={({ isActive }) => `p-2 sm:p-3 lg:p-4 rounded-xl mb-3 sm:mb-4 transition-all duration-200
                     hover:scale-110 active:scale-95
                     ${isActive ? 'text-cyan-500 bg-cyan-50 dark:bg-cyan-500/10 shadow-lg' : 
                     'text-gray-500 hover:text-cyan-500 dark:text-gray-400 dark:hover:text-cyan-400'}`}>
                 <FiHome className="w-5 h-5 sm:w-6 sm:h-6" />
             </NavLink>
-            
-            {isAuthenticated && (
-                <>
                     <NavLink to="/my-rewards"
                         className={({ isActive }) => `p-2 sm:p-3 lg:p-4 rounded-xl mb-3 sm:mb-4 transition-all duration-200
                             hover:scale-110 active:scale-95

@@ -4,11 +4,14 @@
 
 /* Webkit Scrollbar Styling */
 ::-webkit-scrollbar {
+        display: none;
+
     width: 10px;
     height: 10px;
 }
 
 ::-webkit-scrollbar-track {
+    display: none;
     background: transparent;
     border-radius: 5px;
 }

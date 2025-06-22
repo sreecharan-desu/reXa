@@ -31,7 +31,7 @@ export const UserMenu = () => {
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || 'Failed to load profile';
             setError(errorMessage);
-            toast.error(errorMessage);
+            // toast.error(errorMessage);
         }
     };
 

@@ -56,7 +56,8 @@ export const Home = () => {
             
             setRewards(filteredRewards);
         } catch (error) {
-            toast.error('Failed to load rewards');
+            console.log(error)
+            // toast.error('Failed to load rewards');
         } finally {
             setLoading(false);
         }
@@ -91,7 +92,7 @@ export const Home = () => {
                     onClick={() => navigate('/rewards/create')}
                     Icon={FiPlusCircle}
                     label="Create Reward"
-                />
+                />  
             )}
         </PageLayout>
     );

@@ -1,5 +1,4 @@
-import { ReactNode } from 'react';
-import { Sidebar } from './Sidebar';
+
 
 interface PageLayoutProps {
     children: React.ReactNode;
@@ -9,11 +8,11 @@ interface PageLayoutProps {
 
 export const PageLayout = ({ children, title, action }: PageLayoutProps) => {
     return (
-        <div className="min-h-screen pl-16 sm:pl-20 lg:pl-24">
+        <div className="min-h-screen">
             <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
                 {(title || action) && (
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-4 sm:mb-6">
-                        {title && (
+                        {(title  ) && (
                             <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 dark:text-white">
                                 {title}
                             </h1>
