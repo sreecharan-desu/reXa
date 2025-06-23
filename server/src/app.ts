@@ -21,10 +21,10 @@ app.use(hpp());
 // Global CORS configuration
 const allowedOrigins = [
     // Production URLs
-    'https://rex-beige.vercel.app',    
-    'https://rex-api-two.vercel.app',   
+    'https://srees-rex.vercel.app',
+    'https://rex-api-two.vercel.app',
     // Local development URLs
-    'http://localhost:5173',           
+    'http://localhost:5173',
     'http://localhost:5000',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5000'
@@ -44,10 +44,10 @@ const corsOptions = {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: [
-        'Content-Type', 
-        'Authorization', 
-        'Origin', 
-        'Accept', 
+        'Content-Type',
+        'Authorization',
+        'Origin',
+        'Accept',
         'X-Requested-With',
         'Access-Control-Allow-Headers'
     ],
@@ -64,7 +64,7 @@ app.use(express.json());
 
 // Root route
 app.get('/', (req, res) => {
-    res.json({ 
+    res.json({
         message: 'Welcome to reX API 🚀',
         status: 'active',
         version: CONFIG.API_VERSION,
@@ -74,7 +74,7 @@ app.get('/', (req, res) => {
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-    res.json({ 
+    res.json({
         status: 'healthy',
         timestamp: new Date().toISOString()
     });
@@ -90,14 +90,14 @@ app.use('/api/requests', requestRoutes);
 // Error handling middleware - place after routes
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
     console.error('Global error:', err);
-    
+
     // Send CORS headers even for errors
     const origin = req.headers.origin;
     if (origin && allowedOrigins.includes(origin)) {
         res.header('Access-Control-Allow-Origin', origin);
         res.header('Access-Control-Allow-Credentials', 'true');
     }
-    
+
     res.status(err.status || 500).json({
         message: err.message || 'Internal server error',
         code: err.code || 'SERVER_ERROR'
