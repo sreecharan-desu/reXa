@@ -74,7 +74,7 @@ export function Footer() {
                     {/* Logo and Copyright */}
                     <div className="text-center">
                         <div className="font-bold text-xl mb-1 text-blue-600">
-                            reX
+                            reXa
                         </div>
                         <div className="text-gray-500 text-sm">
                             © {year} All rights reserved

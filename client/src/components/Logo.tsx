@@ -22,7 +22,7 @@ export const Logo = () => {
                 />
             </svg>
             <span className="text-2xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
-                reX
+                reXa
             </span>
         </Link>
     );

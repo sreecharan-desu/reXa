@@ -23,6 +23,7 @@ const allowedOrigins = [
     // Production URLs
     'https://srees-rex.vercel.app',
     'https://rex-api-two.vercel.app',
+    'https://rexa.sreecharandesu.in',
     // Local development URLs
     'http://localhost:5173',
     'http://localhost:5000',
