@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import User from '../models/User';
 export interface IUser extends Document {
   username: string;
   email: string;

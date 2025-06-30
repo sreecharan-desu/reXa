@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { rewardApi } from '../services/api';
-import { FiEdit2, FiTrash2 } from 'react-icons/fi';
+import { FiEdit2, FiPlusCircle, FiTrash2 } from 'react-icons/fi';
 import { PageLayout } from '../components/PageLayout';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 import { toast } from 'react-hot-toast';
+import { FloatingActionButton } from '../components/FloatingActionButton';
 
 interface Reward {
     _id: string;
@@ -83,15 +84,7 @@ export const MyRewards = () => {
                                     {reward.title}
                                 </h3>
                                 <div className="flex gap-2">
-                                    {reward.status === 'available' && (
-                                        <button
-                                            onClick={() => navigate(`/rewards/${reward._id}/edit`)}
-                                            className="p-2 text-gray-600 hover:text-cyan-500 
-                                                    dark:text-gray-400 dark:hover:text-cyan-400"
-                                        >
-                                            <FiEdit2 className="w-5 h-5" />
-                                        </button>
-                                    )}
+                            
                                     <button
                                         onClick={() => handleDelete(reward._id)}
                                         className="p-2 text-gray-600 hover:text-red-500 
@@ -113,6 +106,11 @@ export const MyRewards = () => {
                                     {reward.status}
                                 </span>
                             </div>
+                                            <FloatingActionButton
+                                                onClick={() => navigate('/rewards/create')}
+                                                Icon={FiPlusCircle}
+                                                label="Create Reward"
+                                            />  
                         </div>
                     ))
                 ) : (

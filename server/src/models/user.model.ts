@@ -8,6 +8,7 @@ export interface IUser extends Document {
     password: string;
     points: number;
     redeemedRewards: number;
+    isVerified: boolean;
     createdAt: Date;
     updatedAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -41,6 +42,10 @@ const userSchema = new Schema({
     redeemedRewards: {
         type: Number,
         default: 0
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
@@ -79,4 +84,4 @@ userSchema.methods.comparePassword = async function(candidatePassword: string): 
 };
 
 // Create and export the model
-export const User = mongoose.model<IUser>('User', userSchema); 
+export const User = mongoose.model<IUser>('User', userSchema);

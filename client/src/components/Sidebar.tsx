@@ -8,10 +8,10 @@ export const Sidebar = () => {
 
     
     return (
-        <aside className={`fixed ${isAuthenticated ? 'block' : 'hidden'} left-0 top-16 h-[calc(100vh-4rem)] w-14 sm:w-16 lg:w-20 
+        <aside className={`fixed ${isAuthenticated ? `block left-0 top-16 h-[calc(100vh-4rem)] w-14 sm:w-16 lg:w-20 
             flex flex-col items-center py-6 sm:py-8 
             bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
-            shadow-lg z-40`}>
+            shadow-lg z-40` : 'hidden -ml-96'} `}>
 
             
             {isAuthenticated && (

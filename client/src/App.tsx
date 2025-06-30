@@ -70,7 +70,7 @@ export function Footer() {
     return (
         <footer className="bg-white text-gray-800 py-6 mt-auto border-t border-gray-200 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-row justify-between place-content-center items-center space-y-4">
+                <div className="flex flex-col md:flex-row lg:flex-row justify-center place-content-center items-center space-y-4">
                     {/* Logo and Copyright */}
                     <div className="text-center">
                         <div className="font-bold text-xl mb-1 text-blue-600">
@@ -79,41 +79,6 @@ export function Footer() {
                         <div className="text-gray-500 text-sm">
                             © {year} All rights reserved
                         </div>
-                    </div>
-
-
-                    {/* Creator Credit */}
-                    <div className="text-gray-600 text-sm flex flex-col gap-3 items-center space-x-1">
-                        <div>
- <span>Made with </span>
-                        <span className="text-red-500 animate-pulse text-lg"> ♥ </span>
-                        <span>by </span>
-                        <a 
-                            href="https://github.com/sreecharan-desu"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-300"
-                        >
-                            SreeCharan
-                        </a>
-                        </div>
-                       
-
-                    {/* Social Links */}
-                    <div className="flex space-x-6">
-                        {socialLinks.map((link) => (
-                            <a
-                                key={link.name}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-gray-500 hover:text-blue-600 transition-colors duration-300"
-                                aria-label={link.name}
-                            >
-                                {link.icon}
-                            </a>
-                        ))}
-                    </div>
                     </div>
                 </div>
             </div>

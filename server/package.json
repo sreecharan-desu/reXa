@@ -19,7 +19,8 @@
     "helmet": "^6.1.5",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.8.3"
+    "mongoose": "^7.8.3",
+    "nodemailer": "^7.0.4"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
@@ -28,9 +29,9 @@
     "@types/hpp": "^0.2.2",
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20.11.0",
+    "@types/nodemailer": "^6.4.17",
     "nodemon": "^3.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
-

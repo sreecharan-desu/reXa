@@ -8,7 +8,6 @@ import { PageLayout } from '../components/PageLayout';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { FloatingActionButton } from '../components/FloatingActionButton';
 import { EmptyState } from '../components/EmptyState';
-import { toast } from 'react-hot-toast';
 
 interface Reward {
     _id: string;
