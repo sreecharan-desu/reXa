@@ -2,7 +2,6 @@
 
 This document provides a comprehensive overview of the reward and request system, detailing its architecture, workflows, and implementation. This system allows users to earn, redeem, and request rewards within the application.
 
-
 ### 1. System Overview
 
 The reward and request system facilitates the creation, management, and redemption of rewards. Users can earn points, which they can then use to redeem rewards offered by other users. The system also includes a request mechanism, allowing users to request rewards from other users. Key features include:
