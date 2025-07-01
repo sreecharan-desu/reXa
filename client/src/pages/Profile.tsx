@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { authApi } from '../services/api';  // Changed this line
 import { toast } from 'react-hot-toast';
-import { PageLayout } from '../components/PageLayout';
+import { FiEdit2, FiPlusCircle, FiSave, FiX } from 'react-icons/fi';
+import { FloatingActionButton } from '../components/FloatingActionButton';
 import { useNavigate } from 'react-router-dom';
-import { FiEdit2, FiSave, FiX } from 'react-icons/fi';
 
-// ... rest of the file remains the same
 
 interface UserProfile {
     name: string;
@@ -16,7 +14,6 @@ interface UserProfile {
 }
 
 export const Profile = () => {
-    const navigate = useNavigate();
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -24,6 +21,8 @@ export const Profile = () => {
     const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
     const [updateLoading, setUpdateLoading] = useState(false);
 
+
+    const navigate = useNavigate();
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -111,90 +110,99 @@ export const Profile = () => {
     }
 
     return (
-        <div className="min-h-[80vh] p-8 bg-gray-50 dark:bg-gray-900">
-            <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-                <div className="relative p-8">
-                    {!isEditing ? (
+        <div className="min-h-[80vh] p-4 sm:p-6 md:p-8 bg-gray-50 dark:bg-gray-900">
+        <div className="w-full max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div className="flex flex-col justify-center relative p-4 sm:p-6 md:p-8">
+                {!isEditing ? (
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="absolute top-4 right-4 p-2 text-gray-500 hover:text-cyan-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                        <FiEdit2 className="w-5 h-5" />
+                    </button>
+                ) : (
+                    <div className="absolute top-4 right-4 flex space-x-2">
                         <button
-                            onClick={() => setIsEditing(true)}
-                            className="absolute top-4 right-4 p-2 text-gray-500 hover:text-cyan-500 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                            onClick={handleUpdate}
+                            disabled={updateLoading}
+                            className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-gray-700 rounded-full"
                         >
-                            <FiEdit2 className="w-5 h-5" />
+                            <FiSave className="w-5 h-5" />
                         </button>
-                    ) : (
-                        <div className="absolute top-4 right-4 flex space-x-2">
-                            
-                            <button
-                            
-                                onClick={handleUpdate}
-                                disabled={updateLoading}
-                                className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-gray-700 rounded-full"
-                            >
-                                <FiSave className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={() => {
-                                    setIsEditing(false);
-                                    setEditedProfile(profile);
-                                }}
-                                className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 rounded-full"
-                            >
-                                <FiX className="w-5 h-5" />
-                            </button>
-                        </div>
-                    )}
-
-                    <div className="text-center mb-8">
-                        <div className="w-24 h-24 bg-cyan-500 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-3xl font-bold">
-                            {profile?.name?.charAt(0)?.toUpperCase() || '?'}
-                        </div>
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {isEditing ? editedProfile?.name : profile?.name}
-                        </h1>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            {isEditing ? editedProfile?.email : profile?.email}
-                        </p>
+                        <button
+                            onClick={() => {
+                                setIsEditing(false);
+                                setEditedProfile(profile);
+                            }}
+                            className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-gray-700 rounded-full"
+                        >
+                            <FiX className="w-5 h-5" />
+                        </button>
                     </div>
+                )}
 
-                    {isEditing ? (
-                        <div className="mt-8 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Name
-                                </label>
-                                <input
-                                    type="text"
-                                    value={editedProfile?.name || ''}
-                                    onChange={handleNameChange}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-cyan-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Email
-                                </label>
-                                <input
-                                    type="email"
-                                    value={editedProfile?.email || ''}
-                                    onChange={handleEmailChange}
-                                    className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-cyan-500"
-                                />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                                <h3 className="text-lg font-semibold mb-2 text-cyan-500">Points Balance</h3>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{profile?.points}</p>
-                            </div>
-                            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                                <h3 className="text-lg font-semibold mb-2 text-cyan-500">Rewards Redeemed</h3>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white">{profile?.redeemedRewards}</p>
-                            </div>
-                        </div>
-                    )}
+                <div className="text-center mb-6 sm:mb-8">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-cyan-500 rounded-full mx-auto mb-3 sm:mb-4 flex items-center justify-center text-white text-2xl sm:text-3xl font-bold">
+                        {profile?.name?.charAt(0)?.toUpperCase() || '?'}
+                    </div>
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                        {isEditing ? editedProfile?.name : profile?.name}
+                    </h1>
+                    <p className={`${isEditing ? 'disabled' : ''}text-sm sm:text-base text-gray-500 dark:text-gray-400`}>
+                        {isEditing ? editedProfile?.email : profile?.email}
+                    </p>
                 </div>
+
+                {isEditing ? (
+                    <div className="mt-6 sm:mt-8 space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Name
+                            </label>
+                            <input
+                                type="text"
+                                value={editedProfile?.name || ''}
+                                onChange={handleNameChange}
+                                className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-cyan-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Email
+                            </label>
+                            <input
+    type="email"
+    value={editedProfile?.email || ''}
+    onChange={handleEmailChange}
+    disabled={isEditing}
+    className={`w-full p-2 border rounded-md 
+        dark:bg-gray-700 dark:border-gray-600 dark:text-white 
+        focus:ring-2 focus:ring-cyan-500 
+        ${isEditing ? 'bg-gray-200 dark:opacity-50 cursor-not-allowed' : ''}`}
+/>
+
+                        </div>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6">
+                        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 className="text-base sm:text-lg font-semibold mb-2 text-cyan-500">Points Balance</h3>
+                            <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{profile?.points}</p>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h3 className="text-base sm:text-lg font-semibold mb-2 text-cyan-500">Rewards Redeemed</h3>
+                            <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">{profile?.redeemedRewards}</p>
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
+              <FloatingActionButton
+                onClick={() => navigate('/rewards/create')}
+                Icon={FiPlusCircle}
+                label="Create Reward"
+              />
+    </div>
     );
 }; 

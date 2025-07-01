@@ -140,6 +140,7 @@ export const createReward = async (req: AuthRequest, res: Response) => {
 
         const reward = new Reward({
             ...req.body,
+            image_url: req.body.imageUrls[0] || '', // Ensure image_url is set, default to empty string if not provided
             owner: req.user?.userId,
             category: req.body.category || null // Make category optional
         });

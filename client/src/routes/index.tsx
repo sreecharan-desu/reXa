@@ -3,7 +3,7 @@ import { Home } from '../pages/Home';
 import { SignIn } from '../pages/SignIn';
 import { Register } from '../pages/Register';
 import { Profile } from '../pages/Profile';
-import { CreateReward } from '../pages/CreateReward';
+import  CreateReward  from '../pages/CreateReward';
 import { RewardDetails } from '../pages/RewardDetails';
 import { MyRewards } from '../pages/MyRewards';
 import { EditReward } from '../pages/EditReward';

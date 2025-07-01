@@ -26,13 +26,6 @@ interface RewardCardProps {
     onUpdate?: () => void;
 }
 
-interface User {
-    _id: string;
-    name: string;
-    email: string;
-    points: number;
-    redeemedRewards: number;
-}
 
 export const RewardCard = ({ reward, onUpdate }: RewardCardProps) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);

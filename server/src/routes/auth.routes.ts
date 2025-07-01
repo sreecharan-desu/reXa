@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getProfile, updateProfile } from '../controllers/authController';
+import { register, login, getProfile, updateProfile, verifyOtp, resendOtp } from '../controllers/authController';
 import { auth } from '../middleware/auth';
 
 const router = express.Router();
@@ -12,6 +12,8 @@ router.get('/test', (req, res) => {
 // Public routes
 router.post('/register', register);
 router.post('/login', login);
+router.post('/verify-otp', verifyOtp);
+router.post('/resend-otp', resendOtp);
 
 // Protected routes
 router.get('/profile', auth, getProfile);

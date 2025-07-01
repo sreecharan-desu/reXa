@@ -17,6 +17,9 @@ export const authApi = {
         api.post('/auth/login', credentials),
     register: (userData: { name: string; email: string; password: string }) => 
         api.post('/auth/register', userData),
+    verifyOtp: (data: { userId: string; otp: string }) => 
+        api.post('/auth/verify-otp', data),
+    resendOtp: (email: string) => api.post('/auth/resend-otp', { email }),
     getProfile: () => api.get('/auth/profile'),
     updateProfile: (data: any) => api.put('/auth/profile', data)
 };
