@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IReward extends Document {
     title: string;
+    image_url : string;
     description: string;
     points: number;
     code: string;
@@ -26,6 +27,10 @@ const rewardSchema = new Schema({
         type: String,
         required: true,
         trim: true
+    },
+    image_url : {
+        type: String,
+        required: false,
     },
     points: {
         type: Number,

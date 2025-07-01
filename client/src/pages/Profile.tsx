@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { authApi } from '../services/api';  // Changed this line
 import { toast } from 'react-hot-toast';
-import { FiEdit2, FiSave, FiX } from 'react-icons/fi';
+import { FiEdit2, FiPlusCircle, FiSave, FiX } from 'react-icons/fi';
+import { FloatingActionButton } from '../components/FloatingActionButton';
+import { useNavigate } from 'react-router-dom';
 
 
 interface UserProfile {
@@ -19,6 +21,8 @@ export const Profile = () => {
     const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
     const [updateLoading, setUpdateLoading] = useState(false);
 
+
+    const navigate = useNavigate();
     useEffect(() => {
         fetchProfile();
     }, []);
@@ -194,6 +198,11 @@ export const Profile = () => {
 
             </div>
         </div>
+              <FloatingActionButton
+                onClick={() => navigate('/rewards/create')}
+                Icon={FiPlusCircle}
+                label="Create Reward"
+              />
     </div>
     );
 }; 
