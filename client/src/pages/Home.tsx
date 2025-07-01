@@ -105,7 +105,7 @@ export const Home = () => {
 
                 <div className="flex justify-between items-center">
                   <button
-                    onClick={() => navigate(`/rewards/${reward._id}`)}
+                    onClick={() => navigate(`/signin`)}
                     className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
                   >
                     View
