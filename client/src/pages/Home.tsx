@@ -28,28 +28,39 @@ export const Home = () => {
   const navigate = useNavigate();
 
   const fetchRewards = async () => {
-    try {
-      const response = await rewardApi.getAll();
-      const data = Array.isArray(response.data)
-        ? response.data
-        : response.data.data || [];
-      const filtered = data.filter((r: Reward) => {
-        const notOwner = r.owner._id !== user?._id;
-        const available = r.status === 'available';
-        const notExpired = !r.expiryDate || new Date(r.expiryDate) > new Date();
-        const active = r.isActive !== false;
-        return notOwner && available && notExpired && active;
-      });
-      setRewards(filtered);
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load rewards');
-      setRewards([]);
-    } finally {
-      setLoading(false);
+    let attempts = 0;
+    const maxRetries = 3;
+  
+    while (attempts < maxRetries) {
+      try {
+        const response = await rewardApi.getAll();
+        const data = Array.isArray(response.data)
+          ? response.data
+          : response.data.data || [];
+        const filtered = data.filter((r: Reward) => {
+          const notOwner = r.owner._id !== user?._id;
+          const available = r.status === 'available';
+          const notExpired = !r.expiryDate || new Date(r.expiryDate) > new Date();
+          const active = r.isActive !== false;
+          return notOwner && available && notExpired && active;
+        });
+        setRewards(filtered);
+        break; // Exit the loop after success
+      } catch (err) {
+        attempts++;
+        if (attempts >= maxRetries) {
+          console.error(err);
+          toast.error('Failed to load rewards after multiple attempts');
+          setRewards([]); // Optional: clear rewards if failed
+        } else {
+          await new Promise(res => setTimeout(res, 500 * attempts)); // Exponential backoff
+        }
+      }
     }
+  
+    setLoading(false); // Always run after the loop
   };
-
+  
   useEffect(() => {
     fetchRewards();
   }, [user?._id]);
