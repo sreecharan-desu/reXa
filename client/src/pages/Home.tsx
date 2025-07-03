@@ -28,6 +28,13 @@ export const Home = () => {
   const navigate = useNavigate();
 
   const fetchRewards = async () => {
+    const cachedRewards = localStorage.getItem('cachedRewards');
+    if (cachedRewards) {
+      setRewards(JSON.parse(cachedRewards));
+      setLoading(false);
+      return;
+    }
+  
     let attempts = 0;
     const maxRetries = 3;
   
@@ -45,21 +52,23 @@ export const Home = () => {
           return notOwner && available && notExpired && active;
         });
         setRewards(filtered);
-        break; // Exit the loop after success
+        localStorage.setItem('cachedRewards', JSON.stringify(filtered));  // Cache the data
+        break;
       } catch (err) {
         attempts++;
         if (attempts >= maxRetries) {
           console.error(err);
-          toast.error('Failed to load rewards after multiple attempts');
-          setRewards([]); // Optional: clear rewards if failed
+          toast.error('Failed to load rewards after multiple attempts, kindly refresh!');
+          setRewards([]);
         } else {
-          await new Promise(res => setTimeout(res, 500 * attempts)); // Exponential backoff
+          await new Promise(res => setTimeout(res, 500 * attempts));
         }
       }
     }
   
-    setLoading(false); // Always run after the loop
+    setLoading(false);
   };
+  
   
   useEffect(() => {
     fetchRewards();
@@ -105,7 +114,7 @@ export const Home = () => {
 
                 <div className="flex justify-between items-center">
                   <button
-                    onClick={() => navigate(`/signin`)}
+                    onClick={() => !isAuthenticated ? navigate(`/signin`): navigate(`/rewards/${reward._id}`)}
                     className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
                   >
                     View

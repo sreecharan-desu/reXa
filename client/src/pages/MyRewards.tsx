@@ -24,12 +24,20 @@ export const MyRewards = () => {
   const navigate = useNavigate();
 
   const fetchMyRewards = async () => {
+    const cachedMyRewards = localStorage.getItem('cachedMyRewards');
+    if (cachedMyRewards) {
+      setRewards(JSON.parse(cachedMyRewards));
+      setLoading(false);
+      return;
+    }
+  
     try {
       const response = await rewardApi.getMyRewards();
       const rewardsData = Array.isArray(response.data.data)
         ? response.data.data
         : [];
       setRewards(rewardsData);
+      localStorage.setItem('cachedMyRewards', JSON.stringify(rewardsData));  // Cache the data
     } catch (err) {
       console.error('Error fetching rewards:', err);
       toast.error('Failed to load your rewards');
@@ -38,7 +46,7 @@ export const MyRewards = () => {
       setLoading(false);
     }
   };
-
+  
   const handleDelete = async (rewardId: string) => {
     try {
       await rewardApi.delete(rewardId);
