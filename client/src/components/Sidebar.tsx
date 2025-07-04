@@ -48,7 +48,7 @@ export const Sidebar = () => {
                     </NavLink>
 
                     <button
-                        onClick={logout}
+                        onClick={()=>{logout();location.href="/"}}
                         className="p-2 sm:p-3 lg:p-4 rounded-xl mt-auto transition-all duration-200
                             hover:scale-110 active:scale-95 hover:rotate-12
                             text-gray-500 hover:text-red-500 

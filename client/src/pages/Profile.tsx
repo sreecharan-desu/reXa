@@ -46,7 +46,7 @@ export const Profile = () => {
 
   useEffect(() => {
     const isPageRefreshed = performance.getEntriesByType('navigation')[0]?.type === 'reload';
-    if (!profile || isPageRefreshed) fetchProfile();
+    if (!profile || !profile._id) fetchProfile();
     else setLoading(false);
   }, []);
 
