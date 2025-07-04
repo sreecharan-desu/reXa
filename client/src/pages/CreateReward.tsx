@@ -41,30 +41,19 @@ const categoriesList: Category[] = [
   { _id: '507f1f77bcf86cd799439015', name: 'Travel', icon: '✈️' },
 ];
 
-const parseJSON = (text: string) => {
-  try {
-    return JSON.parse(text);
-  } catch {
-    // Try extracting from markdown-like ```json block
-    const match = text.match(/```json\n([\s\S]*?)\n```/);
-    if (match) {
-      return JSON.parse(match[1]);
-    }
-    throw new Error('Invalid JSON');
-  }
-};
+
 
 const CreateReward = () => {
-    const navigate = useNavigate();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [parsedResults, setParsedResults] = useState<ParsedCoupon[]>([]);
+  const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const [parsedResults, setParsedResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    const newItems: ParsedCoupon[] = files.map(file => ({
+    const newItems = files.map(file => ({
       file,
       id: Date.now() + Math.random(),
       name: '',
@@ -72,171 +61,115 @@ const CreateReward = () => {
       expiry_date: '',
       category: '',
       status: 'parsing'
-    } as ParsedCoupon));
+    }));
 
     setParsedResults(prev => [...prev, ...newItems]);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    files.forEach((file, i) => {
+      const reader = new FileReader();
       const itemId = newItems[i].id;
 
-      try {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          try {
-            const base64 = reader.result;
-            const res = await fetch(
-              'https://dark-lord-chamber-production.up.railway.app/api/process-image',
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image_data: base64 }),
-              }
-            );
-            const data = await res.json();
+      reader.onloadend = async () => {
+        try {
+          const base64 = reader.result;
+          const res = await fetch('https://dark-lord-chamber-production.up.railway.app/api/process-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_data: base64 }),
+          });
+          const data = await res.json();
 
-            // Directly map API response
-            const mappedData: ParsedCoupon = {
-              id: itemId,
-              file,
-              name: data.name,
-              description: data.description,
-              category: data.category,
-              ['cupon-code']: data['cupon-code'],
-              expiry_date: data.expiry_date,
-              image_url: data.image_url,
-              image: data.image_url || undefined,
-              points: 10,
-              status: 'parsed',
-              ocr_text: data.ocr_text,
-            };
+          const mappedData = {
+            id: itemId,
+            file,
+            name: data.name || '',
+            description: data.description || '',
+            category: data.category || '',
+            ['cupon-code']: data['cupon-code'] || '',
+            expiry_date: data.expiry_date || '',
+            image_url: data.image_url || '',
+            image: data.image_url || '',
+            points: 10,
+            status: 'parsed',
+            ocr_text: data.ocr_text || '',
+          };
 
-            setParsedResults(prev =>
-              prev.map(item => (item.id === itemId ? mappedData : item))
-            );
-          } catch (err) {
-            setParsedResults(prev =>
-              prev.map(item =>
-                item.id === itemId ? { ...item, status: 'failed' } : item
-              )
-            );
-            toast.error('Parsing error');
-          }
-        };
-        reader.readAsDataURL(file);
-      } catch {
-        toast.error('File reading error');
-        setParsedResults(prev =>
-          prev.map(item =>
-            item.id === itemId ? { ...item, status: 'failed' } : item
-          )
-        );
-      }
-    }
+          setParsedResults(prev => prev.map(item => item.id === itemId ? mappedData : item));
+        } catch {
+          setParsedResults(prev => prev.map(item => item.id === itemId ? { ...item, status: 'failed' } : item));
+          toast.error('Parsing error');
+        }
+      };
+
+      reader.readAsDataURL(file);
+    });
 
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const createSingleReward = async (data: ParsedCoupon, index: number) => {
+  const createSingleReward = async (data, index) => {
     try {
-      setParsedResults(prev =>
-        prev.map((item, i) =>
-          i === index ? { ...item, status: 'creating' } : item
-        )
-      );
-  
-      // Validate required fields
-      const errors: string[] = [];
+      setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'creating' } : item));
+
       const title = data.name?.trim();
       const description = data.description?.trim();
       const code = data['cupon-code']?.trim() || data.code?.trim();
       const expiry = data.expiry_date?.trim();
       const categoryText = data.category?.trim();
-  
+
+      const errors = [];
       if (!title) errors.push('Title is missing');
       if (!description) errors.push('Description is missing');
       if (!code) errors.push('Coupon code is missing');
       if (!expiry) errors.push('Expiry date is missing');
       if (!categoryText) errors.push('Category is missing');
-  
+
       if (errors.length) {
         toast.error(`Cannot create reward: ${errors.join(', ')}`);
-        setParsedResults(prev =>
-          prev.map((item, i) =>
-            i === index ? { ...item, status: 'parsed' } : item
-          )
-        );
+        setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item));
         return;
       }
-  
-      // Safe category match
-      const categoryMatch = categoriesList.find(cat =>
-        categoryText.toLowerCase().includes(cat.name.toLowerCase())
-      );
+
+      const categoryMatch = categoriesList.find(cat => categoryText.toLowerCase().includes(cat.name.toLowerCase()));
       const categoryId = categoryMatch?._id || categoriesList[1]._id;
-  
-      // Safe date parsing
-      const parsedDate = parse(expiry, 'dd.MM.yyyy', new Date());
-      const expiryDateISO = isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString();
-  
-      // Validate points
+
+
       const points = typeof data.points === 'number' && !isNaN(data.points) ? data.points : 10;
-  
+
       const payload = {
         title,
         description,
         points,
         code,
-        expiryDate: expiryDateISO,
+        expiryDate: expiry,
         category: categoryId,
         imageUrls: data.image_url ? [data.image_url] : [],
         ocrText: data.ocr_text || '',
       };
-  
+
       await rewardApi.create(payload);
+
+      setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'created' } : item));
       toast.success(`${payload.title} created successfully!`);
-  
-      setParsedResults(prev =>
-        prev.map((item, i) =>
-          i === index ? { ...item, status: 'created' } : item
-        )
-      );
-    } catch (e: any) {
-      console.error(e);
+    } catch (e) {
       toast.error(`Failed to create reward: ${e.message || 'Unknown error'}`);
-      setParsedResults(prev =>
-        prev.map((item, i) =>
-          i === index ? { ...item, status: 'parsed' } : item
-        )
-      );
+      setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item));
     }
   };
-  
 
-  const handleRetry = async (index: number) => {
+  const handleRetry = (index) => {
     const item = parsedResults[index];
-    if (!item.file) return;
-
-    setParsedResults(prev =>
-      prev.map((it, i) =>
-        i === index ? { ...it, status: 'parsing' } : it
-      )
-    );
-
-    // Same logic as upload: resend file
-    handleImageUpload({ target: { files: [item.file] } } as any);
+    if (item?.file) {
+      handleImageUpload({ target: { files: [item.file] } });
+    }
   };
 
-  const handleRemove = (index: number) => {
+  const handleRemove = (index) => {
     setParsedResults(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleEdit = (index: number, field: string, value: string) => {
-    setParsedResults(prev =>
-      prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
-    );
+  const handleEdit = (index, field, value) => {
+    setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item));
   };
 
   const handleCreateAll = async () => {
@@ -248,10 +181,8 @@ const CreateReward = () => {
       }
     }
     setLoading(false);
-    navigate('/my-rewards');
     toast.success('All rewards created successfully!');
   };
-
   const copyCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast.success('Code copied to clipboard!');
@@ -272,14 +203,7 @@ const CreateReward = () => {
     </div>
 
     <div className="flex items-center gap-4">
-      {parsedResults.length > 0 && (
-        <div className="flex items-center gap-2 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-          <span className="text-sm text-emerald-700 font-medium">
-            {parsedResults.filter(p => p.status === 'created').length}/{parsedResults.length} created
-          </span>
-        </div>
-      )}
+
 
       <input
         ref={fileInputRef}
