@@ -10,6 +10,8 @@ interface Category {
     icon: string;
 }
 
+
+
 export const EditReward = () => {
     const { id } = useParams();
     const navigate = useNavigate();
