@@ -8,6 +8,8 @@ import {
   FiLoader, FiPlus, FiImage, FiCalendar, FiTag, FiCopy, FiShoppingBag
 } from 'react-icons/fi';
 
+import { parse } from 'date-fns';
+
 // Types
 interface ParsedCoupon {
   id: string | number;
@@ -142,32 +144,66 @@ const CreateReward = () => {
           i === index ? { ...item, status: 'creating' } : item
         )
       );
-
+  
+      // Validate required fields
+      const errors: string[] = [];
+      const title = data.name?.trim();
+      const description = data.description?.trim();
+      const code = data['cupon-code']?.trim() || data.code?.trim();
+      const expiry = data.expiry_date?.trim();
+      const categoryText = data.category?.trim();
+  
+      if (!title) errors.push('Title is missing');
+      if (!description) errors.push('Description is missing');
+      if (!code) errors.push('Coupon code is missing');
+      if (!expiry) errors.push('Expiry date is missing');
+      if (!categoryText) errors.push('Category is missing');
+  
+      if (errors.length) {
+        toast.error(`Cannot create reward: ${errors.join(', ')}`);
+        setParsedResults(prev =>
+          prev.map((item, i) =>
+            i === index ? { ...item, status: 'parsed' } : item
+          )
+        );
+        return;
+      }
+  
+      // Safe category match
       const categoryMatch = categoriesList.find(cat =>
-        data.category.toLowerCase().includes(cat.name.toLowerCase())
+        categoryText.toLowerCase().includes(cat.name.toLowerCase())
       );
-
+      const categoryId = categoryMatch?._id || categoriesList[1]._id;
+  
+      // Safe date parsing
+      const parsedDate = parse(expiry, 'dd.MM.yyyy', new Date());
+      const expiryDateISO = isNaN(parsedDate.getTime()) ? new Date().toISOString() : parsedDate.toISOString();
+  
+      // Validate points
+      const points = typeof data.points === 'number' && !isNaN(data.points) ? data.points : 10;
+  
       const payload = {
-        title: data.name,
-        description: data.description,
-        points: data.points || 10,
-        code: data['cupon-code'],
-        expiryDate: new Date(data.expiry_date).toISOString(),
-        category: categoryMatch?._id || categoriesList[1]._id,
+        title,
+        description,
+        points,
+        code,
+        expiryDate: expiryDateISO,
+        category: categoryId,
         imageUrls: data.image_url ? [data.image_url] : [],
-        ocrText: data.ocr_text,
+        ocrText: data.ocr_text || '',
       };
-
+  
       await rewardApi.create(payload);
       toast.success(`${payload.title} created successfully!`);
-
+  
       setParsedResults(prev =>
         prev.map((item, i) =>
           i === index ? { ...item, status: 'created' } : item
         )
       );
-    } catch {
-      toast.error('Failed to create reward');
+    } catch (e: any) {
+      console.error(e);
+      toast.error(`Failed to create reward: ${e.message || 'Unknown error'}`);
       setParsedResults(prev =>
         prev.map((item, i) =>
           i === index ? { ...item, status: 'parsed' } : item
@@ -175,6 +211,7 @@ const CreateReward = () => {
       );
     }
   };
+  
 
   const handleRetry = async (index: number) => {
     const item = parsedResults[index];
