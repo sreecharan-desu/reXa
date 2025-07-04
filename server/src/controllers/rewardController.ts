@@ -3,6 +3,8 @@ import { Reward } from '../models/reward.model';import type { AuthRequest } from
 import mongoose from 'mongoose';
 import { User } from '../models/user.model';
 import{ Transaction } from '../models/transaction.model';
+import { CONFIG } from '../config/config';
+import jwt from "jsonwebtoken"
 
 export const getAllRewards = async (req: Request, res: Response) => {
     try {
@@ -76,7 +78,36 @@ export const getMyRewards = async (req: AuthRequest, res: Response) => {
     }
 };
 
+
+
+export const getAvailableRewards = async (req: AuthRequest, res: Response) => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+  
+      const rewards = await Reward.find({ 
+          status: 'available',
+          owner: { $ne: userId }  // MongoDB way of saying "not equal"
+        })
+        .populate('owner', 'name email')
+        .populate('category', 'name slug icon')
+        .exec();
+  
+      res.json(rewards);
+    } catch (error: any) {
+      console.error('Error in getAvailableRewards:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch available rewards',
+        error: error.message 
+      });
+    }
+  };
+  
+
 export const getAllAvailableRewards = async (req: Request, res: Response) => {
+    const {is_authenticated} = req.query;
     try {
         const rewards = await Reward.find({ status: 'available' })
             .populate('owner', 'name email')
