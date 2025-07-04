@@ -53,7 +53,7 @@ const parseJSON = (text: string) => {
 };
 
 const CreateReward = () => {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [parsedResults, setParsedResults] = useState<ParsedCoupon[]>([]);
   const [loading, setLoading] = useState(false);
@@ -65,8 +65,12 @@ const CreateReward = () => {
     const newItems: ParsedCoupon[] = files.map(file => ({
       file,
       id: Date.now() + Math.random(),
+      name: '',
+      description: '',
+      expiry_date: '',
+      category: '',
       status: 'parsing'
-    }));
+    } as ParsedCoupon));
 
     setParsedResults(prev => [...prev, ...newItems]);
 
@@ -79,33 +83,36 @@ const CreateReward = () => {
         reader.onloadend = async () => {
           try {
             const base64 = reader.result;
-            const res = await fetch('https://dark-lord-chamber-production.up.railway.app/api/process-image', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image_data: base64 }),
-            });
+            const res = await fetch(
+              'https://dark-lord-chamber-production.up.railway.app/api/process-image',
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image_data: base64 }),
+              }
+            );
             const data = await res.json();
 
-            if (data.success) {
-              const parsedJson = parseJSON(data.ai_response);
-              setParsedResults(prev =>
-                prev.map(item =>
-                  item.id === itemId
-                    ? { 
-                        ...parsedJson, 
-                        id: itemId, 
-                        image: data.image_url,
-                        image_url: data.image_url,
-                        ocr_text: data.ocr_text,
-                        status: 'parsed' 
-                      }
-                    : item
-                )
-              );
-            } else {
-              throw new Error(data.error || 'Parsing failed');
-            }
-          } catch {
+            // Directly map API response
+            const mappedData: ParsedCoupon = {
+              id: itemId,
+              file,
+              name: data.name,
+              description: data.description,
+              category: data.category,
+              ['cupon-code']: data['cupon-code'],
+              expiry_date: data.expiry_date,
+              image_url: data.image_url,
+              image: data.image_url || undefined,
+              points: 10,
+              status: 'parsed',
+              ocr_text: data.ocr_text,
+            };
+
+            setParsedResults(prev =>
+              prev.map(item => (item.id === itemId ? mappedData : item))
+            );
+          } catch (err) {
             setParsedResults(prev =>
               prev.map(item =>
                 item.id === itemId ? { ...item, status: 'failed' } : item
@@ -131,37 +138,40 @@ const CreateReward = () => {
   const createSingleReward = async (data: ParsedCoupon, index: number) => {
     try {
       setParsedResults(prev =>
-        prev.map((item, i) => i === index ? { ...item, status: 'creating' } : item)
+        prev.map((item, i) =>
+          i === index ? { ...item, status: 'creating' } : item
+        )
       );
 
       const categoryMatch = categoriesList.find(cat =>
-        data.category?.toLowerCase().includes(cat.name.toLowerCase())
+        data.category.toLowerCase().includes(cat.name.toLowerCase())
       );
 
       const payload = {
         title: data.name,
         description: data.description,
         points: data.points || 10,
-        code: data['cupon-code'] || data.code,
-        expiryDate: data.expiry_date ? new Date(data.expiry_date).toISOString() : new Date().toISOString(),
-        category: categoryMatch?._id || categoriesList[1]._id, // Default to Shopping
-        imageUrls: [data.image_url || data.image],
+        code: data['cupon-code'],
+        expiryDate: new Date(data.expiry_date).toISOString(),
+        category: categoryMatch?._id || categoriesList[1]._id,
+        imageUrls: data.image_url ? [data.image_url] : [],
         ocrText: data.ocr_text,
       };
 
-      const res = await rewardApi.create(payload);
+      await rewardApi.create(payload);
       toast.success(`${payload.title} created successfully!`);
 
       setParsedResults(prev =>
-        prev.map((item, i) => i === index ? { ...item, status: 'created' } : item)
+        prev.map((item, i) =>
+          i === index ? { ...item, status: 'created' } : item
+        )
       );
-
-      // navigate(`/rewards/${res.data._id}`);
-    } catch (error) {
-      console.error('Error creating reward:', error);
+    } catch {
       toast.error('Failed to create reward');
       setParsedResults(prev =>
-        prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item)
+        prev.map((item, i) =>
+          i === index ? { ...item, status: 'parsed' } : item
+        )
       );
     }
   };
@@ -171,54 +181,13 @@ const CreateReward = () => {
     if (!item.file) return;
 
     setParsedResults(prev =>
-      prev.map((item, i) => i === index ? { ...item, status: 'parsing' } : item)
+      prev.map((it, i) =>
+        i === index ? { ...it, status: 'parsing' } : it
+      )
     );
 
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        try {
-          const base64 = reader.result;
-          const res = await fetch('https://dark-lord-chamber-production.up.railway.app/api/process-image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image_data: base64 }),
-          });
-          const data = await res.json();
-
-          if (data.success) {
-            const parsedJson = parseJSON(data.ai_response);
-            setParsedResults(prev =>
-              prev.map((item, i) =>
-                i === index
-                  ? { 
-                      ...parsedJson, 
-                      id: item.id, 
-                      image: data.image_url,
-                      image_url: data.image_url,
-                      ocr_text: data.ocr_text,
-                      status: 'parsed' 
-                    }
-                  : item
-              )
-            );
-          } else {
-            throw new Error(data.error || 'Parsing failed');
-          }
-        } catch {
-          setParsedResults(prev =>
-            prev.map((item, i) => i === index ? { ...item, status: 'failed' } : item)
-          );
-          toast.error('Retry parsing failed');
-        }
-      };
-      reader.readAsDataURL(item.file);
-    } catch {
-      toast.error('File reading error during retry');
-      setParsedResults(prev =>
-        prev.map((item, i) => i === index ? { ...item, status: 'failed' } : item)
-      );
-    }
+    // Same logic as upload: resend file
+    handleImageUpload({ target: { files: [item.file] } } as any);
   };
 
   const handleRemove = (index: number) => {
@@ -227,17 +196,17 @@ const CreateReward = () => {
 
   const handleEdit = (index: number, field: string, value: string) => {
     setParsedResults(prev =>
-      prev.map((item, i) => i === index ? { ...item, [field]: value } : item)
+      prev.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
     );
   };
 
   const handleCreateAll = async () => {
     setLoading(true);
-    const toCreate = parsedResults.filter(item => item.status === 'parsed');
-    
-    for (const [i, item] of parsedResults.entries()) {
-      if (item.status === 'parsed') {
-        await createSingleReward(item, i);
+    for (let i = 0; i < parsedResults.length; i++) {
+      if (parsedResults[i].status === 'parsed') {
+        await createSingleReward(parsedResults[i], i);
         await new Promise(res => setTimeout(res, 500));
       }
     }
@@ -250,101 +219,116 @@ const CreateReward = () => {
     navigator.clipboard.writeText(code);
     toast.success('Code copied to clipboard!');
   };
-
   return (
-    <div className="h-screen bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden flex flex-col">
-      <div className="bg-white/80 backdrop-blur-sm border-b border-white/20 px-6 py-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-            Coupon Manager
-          </h1>
-          <p className="text-gray-600 text-sm">Upload coupons and create rewards automatically</p>
-        </div>
-        <div className="flex items-center gap-4">
-          {parsedResults.length > 0 && (
-            <div className="flex items-center gap-2 bg-emerald-100 px-3 py-1 rounded-full">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-emerald-700 font-medium">
-                {parsedResults.filter(p => p.status === 'created').length}/{parsedResults.length} created
-              </span>
-            </div>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-            className="hidden"
-          />
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-6 py-2.5 rounded-xl flex items-center gap-2 font-medium shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-          >
-            <FiPlus className="w-4 h-4" />
-            Upload Images
-          </button>
-        </div>
-      </div>
+<div className="h-screen bg-slate-50 overflow-hidden flex flex-col">
 
-      <div className="flex-1 overflow-auto p-6">
-        {parsedResults.length === 0 ? (
-          <div className="h-full flex flex-col justify-center items-center text-center">
-            <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-8 rounded-2xl mb-6">
-              <FiImage className="w-16 h-16 text-cyan-600 mx-auto mb-4" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No coupons uploaded yet</h3>
-            <p className="text-gray-500 max-w-md">
-              Upload coupon images to automatically extract details and create rewards
-            </p>
-          </div>
-        ) : (
-          <>
-            {parsedResults.some(p => p.status === 'parsed') && (
-              <div className="flex justify-end mb-6">
-                <button
-                  disabled={loading}
-                  onClick={handleCreateAll}
-                  className={`px-6 py-3 rounded-xl text-white font-medium transition-all duration-200 flex items-center gap-2 ${
-                    loading
-                      ? 'bg-gray-300 cursor-not-allowed'
-                      : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 shadow-lg hover:shadow-xl transform hover:scale-105'
-                  }`}
-                >
-                  {loading ? (
-                    <>
-                      <FiLoader className="w-4 h-4 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <FiCheck className="w-4 h-4" />
-                      Create All Rewards
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {parsedResults.map((item, index) => (
-                <CouponCard
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  onEdit={handleEdit}
-                  onRemove={handleRemove}
-                  onRetry={handleRetry}
-                  onCreate={createSingleReward}
-                  onCopyCode={copyCode}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
+{/* Header */}
+<div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-5">
+  <div className="max-w-7xl mx-auto flex justify-between items-center">
+    <div>
+      <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
+        Coupon Manager
+      </h1>
+      <p className="text-gray-600 text-sm mt-1">
+        Upload coupons and create rewards automatically.
+      </p>
     </div>
+
+    <div className="flex items-center gap-4">
+      {parsedResults.length > 0 && (
+        <div className="flex items-center gap-2 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-200">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+          <span className="text-sm text-emerald-700 font-medium">
+            {parsedResults.filter(p => p.status === 'created').length}/{parsedResults.length} created
+          </span>
+        </div>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={handleImageUpload}
+        className="hidden"
+      />
+
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-medium border border-transparent"
+      >
+        <FiPlus className="w-4 h-4" />
+        Upload Images
+      </button>
+    </div>
+  </div>
+</div>
+
+{/* Main Content */}
+<div className="flex-1 overflow-auto px-6 py-8">
+  <div className="max-w-7xl mx-auto">
+    {parsedResults.length === 0 ? (
+      <div className="h-full flex flex-col justify-center items-center text-center">
+        <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-8 rounded-2xl mb-6 border border-gray-200">
+          <FiImage className="w-16 h-16 text-cyan-600 mx-auto mb-4" />
+        </div>
+        <h3 className="text-xl font-semibold text-gray-700 mb-2">No coupons uploaded yet</h3>
+        <p className="text-gray-500 max-w-md">
+          Upload coupon images to automatically extract details and create rewards.
+        </p>
+      </div>
+    ) : (
+      <>
+        {parsedResults.some(p => p.status === 'parsed') && (
+          <div className="flex justify-end mb-6">
+            <button
+              disabled={loading}
+              onClick={handleCreateAll}
+              className={`px-6 py-3 rounded-lg text-white font-medium flex items-center gap-2 ${
+                loading
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-emerald-600 to-green-600 border border-transparent'
+              }`}
+            >
+              {loading ? (
+                <>
+                  <FiLoader className="w-4 h-4" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <FiCheck className="w-4 h-4" />
+                  Create All Rewards
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {parsedResults.map((item, index) => (
+            <CouponCard
+              key={item.id}
+              item={item}
+              index={index}
+              onEdit={handleEdit}
+              onRemove={handleRemove}
+              onRetry={handleRetry}
+              onCreate={createSingleReward}
+              onCopyCode={copyCode}
+            />
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+</div>
+
+</div>
+
   );
+  
+  
 };
 
 interface ParsedCoupon {
