@@ -3,11 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { rewardApi } from '../services/api';
 import { FiCalendar, FiGift, FiHash, FiTag, FiAlertCircle } from 'react-icons/fi';
 import { toast } from 'react-hot-toast';
+import { FaGamepad, FaPlane } from 'react-icons/fa';
+import { FiShoppingBag } from 'react-icons/fi';
+import { MdMovie, MdFastfood } from 'react-icons/md';
 
 interface Category {
     _id: string;
     name: string;
-    icon: string;
+    icon: React.ReactNode;
 }
 
 
@@ -26,13 +29,16 @@ export const EditReward = () => {
         category: ''
     });
 
+
     const [categories] = useState<Category[]>([
-        { _id: '507f1f77bcf86cd799439011', name: 'Gaming', icon: '🎮' },
-        { _id: '507f1f77bcf86cd799439012', name: 'Shopping', icon: '🛍️' },
-        { _id: '507f1f77bcf86cd799439013', name: 'Entertainment', icon: '🎬' },
-        { _id: '507f1f77bcf86cd799439014', name: 'Food & Drinks', icon: '🍽️' },
-        { _id: '507f1f77bcf86cd799439015', name: 'Travel', icon: '✈️' },
+        { _id: '507f1f77bcf86cd799439011', name: 'Gaming', icon: <FaGamepad className="w-4 h-4 text-purple-500" /> },
+        { _id: '507f1f77bcf86cd799439012', name: 'Shopping', icon: <FiShoppingBag className="w-4 h-4 text-pink-500" /> },
+        { _id: '507f1f77bcf86cd799439013', name: 'Entertainment', icon: <MdMovie className="w-4 h-4 text-yellow-500" /> },
+        { _id: '507f1f77bcf86cd799439014', name: 'Food & Drinks', icon: <MdFastfood className="w-4 h-4 text-red-500" /> },
+        { _id: '507f1f77bcf86cd799439015', name: 'Travel', icon: <FaPlane className="w-4 h-4 text-cyan-500" /> },
     ]);
+    
+    
 
     useEffect(() => {
         fetchReward();
@@ -42,7 +48,7 @@ export const EditReward = () => {
     const fetchReward = async () => {
         try {
             const response = await rewardApi.getById(id!);
-            
+
             const reward = response.data;
             setForm({
                 title: reward.title,
@@ -176,19 +182,20 @@ export const EditReward = () => {
                                     Category
                                 </label>
                                 <select
-                                    value={form.category}
-                                    onChange={e => setForm({ ...form, category: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
-                                             dark:bg-gray-800 focus:ring-2 focus:ring-cyan-500 focus:border-transparent
-                                             text-gray-900 dark:text-white"
-                                >
-                                    <option value="">Select a category</option>
-                                    {categories.map(category => (
-                                        <option key={category._id} value={category._id}>
-                                            {category.icon} {category.name}
-                                        </option>
-                                    ))}
-                                </select>
+    value={form.category}
+    onChange={e => setForm({ ...form, category: e.target.value })}
+    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 
+               dark:bg-gray-800 focus:ring-2 focus:ring-cyan-500 focus:border-transparent
+               text-gray-900 dark:text-white"
+>
+    <option value="">Select a category</option>
+    {categories.map(category => (
+        <option key={category._id} value={category._id}>
+            {category.name}
+        </option>
+    ))}
+</select>
+
                             </div>
                         </div>
 
