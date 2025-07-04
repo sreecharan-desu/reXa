@@ -36,6 +36,7 @@ export const EditReward = () => {
 
     useEffect(() => {
         fetchReward();
+        
     }, [id]);
 
     const fetchReward = async () => {
