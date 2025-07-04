@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api, authApi } from '../services/api';
-import { toast } from 'react-hot-toast';
+import { useRecoilState } from 'recoil';
+import { rewardsState } from '../store/atoms';
 
 interface User {
     _id: string;
@@ -20,6 +21,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+    const [, setRewards] = useRecoilState(rewardsState);
+    
     const [user, setUser] = useState<User | null>(() => {
         // Initialize user state from localStorage if available
         const token = localStorage.getItem('token');
@@ -47,7 +50,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { token } = response.data;
         setAuthToken(token);
         await fetchProfile();
-        localStorage.removeItem('cachedRewards'); // Clear cached rewards on login
+        setRewards([])
     };
 
     const logout = () => {
