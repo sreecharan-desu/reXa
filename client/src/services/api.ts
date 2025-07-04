@@ -31,8 +31,7 @@ export const rewardApi = {
     create: (data: any) => api.post('/rewards', data),
     update: (id: string, data: any) => api.put(`/rewards/${id}`, data),
     delete: (id: string) => api.delete(`/rewards/${id}`),
-    getMyRewards: () => api.get('/rewards/user/my-rewards'),
-    getAuthenticatedAvaialbleRewards : ()=> api.get('/rewards/user/rewards')
+    getMyRewards: () => api.get('/rewards/user/my-rewards')
 };
 
 // Add interfaces for type safety

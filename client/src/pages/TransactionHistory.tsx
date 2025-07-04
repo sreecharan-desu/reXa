@@ -1,43 +1,56 @@
-import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useState, useEffect } from 'react';
 import { transactionApi } from '../services/api';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { format } from 'date-fns';
 import { FiGift, FiClock, FiUser, FiHash } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
-import { transactionsState, transactionsLoadingState, transactionsErrorState } from '../store/atoms';
+
+interface Transaction {
+  _id: string;
+  fromUser: { _id: string; name: string };
+  toUser: { _id: string; name: string };
+  reward: { 
+    _id: string; 
+    title: string; 
+    points: number;
+    description: string;
+    code: string;
+  };
+  type: 'redemption';
+  createdAt: string;
+}
 
 export const TransactionHistory = () => {
   const { user } = useAuth();
-  const [transactions, setTransactions] = useRecoilState(transactionsState);
-  const [isLoading, setIsLoading] = useRecoilState(transactionsLoadingState);
-  const [error, setError] = useRecoilState(transactionsErrorState);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const cachedData = localStorage.getItem('cachedTransactions');
+    if (cachedData) {
+      const parsedData = JSON.parse(cachedData);
+      setTransactions(parsedData);
+      setIsLoading(false);
+      return;
+    }
+
+    fetchTransactions();
+  }, []);
 
   const fetchTransactions = async () => {
-    setIsLoading(true);
-    setError(null);
-
     try {
       const response = await transactionApi.getHistory();
-      const data = Array.isArray(response.data) ? response.data : [];
+      const data = response.data || [];
       setTransactions(data);
+      localStorage.setItem('cachedTransactions', JSON.stringify(data));  // Cache set here
     } catch (err) {
       console.error('Failed to fetch transactions:', err);
       setError('Failed to load transactions');
-      setTransactions([]);
     } finally {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-
-    if (!transactions || transactions.length === 0) {
-      fetchTransactions();
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
 
   if (isLoading) return <LoadingSpinner />;
   if (error) return <div className="text-red-500 text-center py-4">{error}</div>;
@@ -51,7 +64,10 @@ export const TransactionHistory = () => {
       <div className="space-y-6">
         {transactions.length > 0 ? (
           transactions.map((transaction) => (
-            <div key={transaction._id} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden">
+            <div
+              key={transaction._id}
+              className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden"
+            >
               <div className="p-4 sm:p-5 border-b border-gray-200 dark:border-gray-700">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0">
                   <div className="flex items-center space-x-2">

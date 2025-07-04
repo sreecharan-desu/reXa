@@ -4,8 +4,6 @@ import { toast } from 'react-hot-toast';
 import { FiEdit2, FiPlusCircle, FiSave, FiX, FiUser, FiMail, FiAward, FiGift, FiCheckCircle, FiCalendar, FiTrendingUp } from 'react-icons/fi';
 import { FloatingActionButton } from '../components/FloatingActionButton';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
-import { profileErrorState, profileLoadingState, profileState } from '../store/atoms';
 
 interface UserProfile {
   _id: string;
@@ -20,84 +18,136 @@ interface UserProfile {
 }
 
 export const Profile = () => {
-  const [profile, setProfile] = useRecoilState(profileState);
-  const [loading, setLoading] = useRecoilState(profileLoadingState);
-  const [error, setError] = useRecoilState(profileErrorState);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState(profile);
+  const [editedProfile, setEditedProfile] = useState<UserProfile | null>(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const cachedProfile = localStorage.getItem('cachedUserProfile');
+    if (cachedProfile) {
+      const parsedProfile = JSON.parse(cachedProfile);
+      setProfile(parsedProfile);
+      setEditedProfile(parsedProfile);
+      setLoading(false);
+      return;
+    }
+
+    fetchProfile();
+  }, []);
+
   const fetchProfile = async () => {
-    setLoading(true);
-    setError('');
     try {
       const response = await authApi.getProfile();
-      setProfile(response.data);
-      setEditedProfile(response.data);
-    } catch (err) {
+      if (response.data) {
+        setProfile(response.data);
+        setEditedProfile(response.data);
+        localStorage.setItem('cachedUserProfile', JSON.stringify(response.data));
+        setError('');
+      }
+    } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to load profile';
-      console.error(errorMessage);
+      console.log(errorMessage);
+      if (localStorage.getItem('token')) {
+        console.error('Profile fetch error:', err);
+      }
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const isPageRefreshed = performance.getEntriesByType('navigation')[0]?.type === 'reload';
-    if (!profile || isPageRefreshed) fetchProfile();
-    else setLoading(false);
-  }, []);
-
   const handleUpdate = async () => {
     if (!editedProfile) return;
+
     try {
-      setLoading(true);
+      setUpdateLoading(true);
+      setError('');
+
       const response = await authApi.updateProfile({
         name: editedProfile.name,
         email: editedProfile.email
       });
-      setProfile(response.data);
-      setEditedProfile(response.data);
-      setIsEditing(false);
-      toast.success('Profile updated successfully');
-    } catch (err) {
+
+      if (response.data) {
+        setProfile(response.data);
+        setEditedProfile(response.data);
+        setIsEditing(false);
+        toast.success('Profile updated successfully');
+        localStorage.removeItem('cachedUserProfile');
+      }
+    } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to update profile';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
-      setLoading(false);
+      setUpdateLoading(false);
     }
   };
 
-  const handleNameChange = (e) => {
-    setEditedProfile({ ...editedProfile, name: e.target.value });
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (editedProfile) {
+      setEditedProfile({
+        ...editedProfile,
+        name: e.target.value
+      });
+    }
   };
 
-  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  });
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (editedProfile) {
+      setEditedProfile({
+        ...editedProfile,
+        email: e.target.value
+      });
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
   const getAccountAge = () => {
     if (!profile?.createdAt) return '';
-    const days = Math.ceil((new Date() - new Date(profile.createdAt)) / (1000 * 60 * 60 * 24));
-    if (days < 30) return `${days} day${days > 1 ? 's' : ''} ago`;
-    if (days < 365) return `${Math.floor(days / 30)} month${Math.floor(days / 30) > 1 ? 's' : ''} ago`;
-    return `${Math.floor(days / 365)} year${Math.floor(days / 365) > 1 ? 's' : ''} ago`;
+    const createdDate = new Date(profile.createdAt);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - createdDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 30) {
+      return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    } else if (diffDays < 365) {
+      const months = Math.floor(diffDays / 30);
+      return `${months} month${months > 1 ? 's' : ''} ago`;
+    } else {
+      const years = Math.floor(diffDays / 365);
+      return `${years} year${years > 1 ? 's' : ''} ago`;
+    }
   };
 
-  if (loading) return (
-    <div className="min-h-[80vh] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500 border-t-transparent"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-500 border-t-transparent"></div>
+      </div>
+    );
+  }
 
-  if (error || !profile) return (
-    <div className="min-h-[80vh] flex items-center justify-center">
-      <div className="text-red-500">{error || 'Profile not found'}</div>
-    </div>
-  );
+  if (error || !profile) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="text-red-500">{error || 'Profile not found'}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] p-4 sm:p-6 md:p-8 bg-gray-50 dark:bg-gray-900">

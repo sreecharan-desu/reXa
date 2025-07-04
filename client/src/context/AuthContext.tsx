@@ -47,11 +47,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { token } = response.data;
         setAuthToken(token);
         await fetchProfile();
-        localStorage.removeItem('cachedRewards'); // Clear cached rewards on login
     };
 
     const logout = () => {
-        localStorage.clear();
         setAuthToken(null);
         setUser(null);
         setIsAuthenticated(false);

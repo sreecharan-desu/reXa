@@ -1,26 +1,43 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRecoilState } from 'recoil';
 import { rewardApi } from '../services/api';
-import { FiTrash2, FiCalendar, FiShoppingBag, FiPlusCircle } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiLoader, FiCheck, FiAlertCircle, FiCalendar, FiTag, FiShoppingBag, FiPlusCircle } from 'react-icons/fi';
 import { PageLayout } from '../components/PageLayout';
 import { SkeletonLoader } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 import { toast } from 'react-hot-toast';
 import { FloatingActionButton } from '../components/FloatingActionButton';
-import { myRewardsState, myRewardsLoadingState } from '../store/atoms';
+
+interface Reward {
+  _id: string;
+  title: string;
+  description: string;
+  points: number;
+  status: 'available' | 'redeemed' | 'exchanged';
+  image_url: string;
+  expiryDate: string;
+}
 
 export const MyRewards = () => {
-  const [rewards, setRewards] = useRecoilState(myRewardsState);
-  const [loading, setLoading] = useRecoilState(myRewardsLoadingState);
+  const [rewards, setRewards] = useState<Reward[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchMyRewards = async () => {
-    setLoading(true);
+    const cachedMyRewards = localStorage.getItem('cachedMyRewards');
+    if (cachedMyRewards) {
+      setRewards(JSON.parse(cachedMyRewards));
+      setLoading(false);
+      return;
+    }
+  
     try {
       const response = await rewardApi.getMyRewards();
-      const rewardsData = Array.isArray(response.data.data) ? response.data.data : [];
+      const rewardsData = Array.isArray(response.data.data)
+        ? response.data.data
+        : [];
       setRewards(rewardsData);
+      localStorage.setItem('cachedMyRewards', JSON.stringify(rewardsData));  // Cache the data
     } catch (err) {
       console.error('Error fetching rewards:', err);
       toast.error('Failed to load your rewards');
@@ -29,16 +46,7 @@ export const MyRewards = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-
-    if (!rewards || rewards.length === 0) {
-      fetchMyRewards();
-    } else {
-      setLoading(false);
-    }
-  }, []);  // ✅ Run only once on mount
-
+  
   const handleDelete = async (rewardId: string) => {
     try {
       await rewardApi.delete(rewardId);
@@ -50,11 +58,17 @@ export const MyRewards = () => {
     }
   };
 
+  useEffect(() => {
+    fetchMyRewards();
+  }, []);
+
   if (loading) {
     return (
       <PageLayout title="My Rewards">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array(3).fill(null).map((_, i) => <SkeletonLoader key={i} />)}
+          {Array(3).fill(null).map((_, i) => (
+            <SkeletonLoader key={i} />
+          ))}
         </div>
       </PageLayout>
     );
@@ -80,6 +94,8 @@ export const MyRewards = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {rewards.map((reward) => (
           <div key={reward._id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+
+            {/* Image */}
             <div className="relative h-[200px] overflow-hidden">
               <img
                 src={reward.image_url}
@@ -88,17 +104,22 @@ export const MyRewards = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
             </div>
+
+            {/* Body */}
             <div className="p-4 space-y-3">
               <h3 className="font-semibold text-gray-800 dark:text-white line-clamp-2">{reward.title}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{reward.description}</p>
+
               <div className="flex items-center gap-2 text-sm">
                 <FiShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <span className="font-medium text-gray-800 dark:text-white">{reward.points}</span>
               </div>
+
               <div className="flex items-center gap-2 text-sm">
                 <FiCalendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <span className="text-gray-700 dark:text-gray-300">Expires: {new Date(reward.expiryDate).toLocaleDateString()}</span>
               </div>
+
               <div className="flex justify-between items-center">
                 <button
                   onClick={() => navigate(`/rewards/${reward._id}`)}
