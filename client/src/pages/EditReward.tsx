@@ -36,12 +36,13 @@ export const EditReward = () => {
 
     useEffect(() => {
         fetchReward();
-        
+
     }, [id]);
 
     const fetchReward = async () => {
         try {
             const response = await rewardApi.getById(id!);
+            
             const reward = response.data;
             setForm({
                 title: reward.title,
