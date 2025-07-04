@@ -31,13 +31,12 @@ export const MyRewards = () => {
   };
 
   useEffect(() => {
-
     if (!rewards || rewards.length === 0) {
       fetchMyRewards();
     } else {
       setLoading(false);
     }
-  }, []);  // ✅ Run only once on mount
+  }, []);
 
   const handleDelete = async (rewardId: string) => {
     try {
@@ -53,8 +52,8 @@ export const MyRewards = () => {
   if (loading) {
     return (
       <PageLayout title="My Rewards">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array(3).fill(null).map((_, i) => <SkeletonLoader key={i} />)}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array(6).fill(null).map((_, i) => <SkeletonLoader key={i} />)}
         </div>
       </PageLayout>
     );
@@ -79,36 +78,52 @@ export const MyRewards = () => {
     <PageLayout title="My Rewards">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {rewards.map((reward) => (
-          <div key={reward._id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-            <div className="relative h-[200px] overflow-hidden">
+          <div
+            key={reward._id}
+            className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700 flex flex-col h-full"
+          >
+
+            {/* Image */}
+            <div className="relative w-full h-[250px] bg-gray-100 overflow-hidden">
               <img
                 src={reward.image_url}
                 alt={reward.title}
-                className="w-full h-[250px] object-cover object-top scale-125 translate-y-[-50px]"
+                className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
             </div>
-            <div className="p-4 space-y-3">
-              <h3 className="font-semibold text-gray-800 dark:text-white line-clamp-2">{reward.title}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{reward.description}</p>
-              <div className="flex items-center gap-2 text-sm">
-                <FiShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <span className="font-medium text-gray-800 dark:text-white">{reward.points}</span>
+
+            {/* Content */}
+            <div className="p-4 flex flex-col flex-1 justify-between">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-gray-800 dark:text-white line-clamp-2 text-base">
+                  {reward.title || 'Untitled Reward'}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                  {reward.description || 'No description provided.'}
+                </p>
+
+                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <FiShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span className="font-medium text-gray-800 dark:text-white">{reward.points} Points</span>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <FiCalendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <span>Expires: {new Date(reward.expiryDate).toLocaleDateString()}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <FiCalendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <span className="text-gray-700 dark:text-gray-300">Expires: {new Date(reward.expiryDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex justify-between items-center">
+
+              <div className="flex items-center mt-4">
                 <button
                   onClick={() => navigate(`/rewards/${reward._id}`)}
-                  className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
+                  className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2 rounded-lg font-medium transition-transform transform hover:scale-105"
                 >
                   View
                 </button>
                 <button
                   onClick={() => handleDelete(reward._id)}
-                  className="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors ml-2"
+                  className="p-2 text-red-500 hover:bg-red-100 rounded-lg ml-2 transition-colors"
                 >
                   <FiTrash2 className="w-5 h-5" />
                 </button>
