@@ -3,15 +3,16 @@ import { Reward } from '../models/reward.model';import type { AuthRequest } from
 import mongoose from 'mongoose';
 import { User } from '../models/user.model';
 import{ Transaction } from '../models/transaction.model';
-import { CONFIG } from '../config/config';
-import jwt from "jsonwebtoken"
+
 
 export const getAllRewards = async (req: Request, res: Response) => {
     try {
         const rewards = await Reward.find()
+            .select('-code') // Exclude the `code` field
             .populate('owner', 'name email')
             .populate('category', 'name slug icon')
-            .exec();
+            .exec()
+            ;
 
         if (!rewards) {
             return res.status(404).json({ message: 'No rewards found' });
@@ -45,7 +46,8 @@ export const getMyRewards = async (req: AuthRequest, res: Response) => {
             .populate('owner', 'name email')
             .populate('category', 'name')
             .sort({ createdAt: -1 })
-            .lean(); // Add lean() for better performance
+            .lean()
+            ; // Add lean() for better performance
 
         console.log('Raw rewards found:', rewards);
         console.log(`Found ${rewards.length} rewards owned by user ${userId}`);
@@ -91,6 +93,7 @@ export const getAvailableRewards = async (req: AuthRequest, res: Response) => {
           status: 'available',
           owner: { $ne: userId }  // MongoDB way of saying "not equal"
         })
+        .select('-code') // Exclude the `code` field
         .populate('owner', 'name email')
         .populate('category', 'name slug icon')
         .exec();
@@ -110,6 +113,7 @@ export const getAllAvailableRewards = async (req: Request, res: Response) => {
     const {is_authenticated} = req.query;
     try {
         const rewards = await Reward.find({ status: 'available' })
+            .select('-code') // Exclude the `code` field
             .populate('owner', 'name email')
             .populate('category', 'name slug icon')
             .exec();
@@ -221,7 +225,9 @@ export const createReward = async (req: AuthRequest, res: Response) => {
 export const getRewardById = async (req: AuthRequest, res: Response) => {
   try {
     const reward = await Reward.findById(req.params.id)
-      .populate('owner', 'name email');
+    .select('-code') // Exclude the `code` field
+    .populate('owner', 'name email');
+  // Remove category from the response
     
     if (!reward) {
       return res.status(404).json({ message: 'Reward not found' });
@@ -326,7 +332,8 @@ export const redeemReward = async (req: AuthRequest, res: Response) => {
 
 export const updateReward = async (req: AuthRequest, res: Response) => {
     try {
-        const reward = await Reward.findById(req.params.id);
+        const reward = await Reward.findById(req.params.id) // Exclude the `code` field
+        ;
         
         if (!reward) {
             return res.status(404).json({ message: 'Reward not found' });
@@ -342,7 +349,8 @@ export const updateReward = async (req: AuthRequest, res: Response) => {
             { ...req.body },
             { new: true }
         ).populate('owner', 'name email')
-         .populate('category');
+         .populate('category')    .select('-code') // Exclude the `code` field
+         ;
 
         res.json(updatedReward);
     } catch (error) {
