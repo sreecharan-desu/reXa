@@ -81,14 +81,17 @@ export const Home = () => {
         ) : (
           rewards.map(reward => (
             <div key={reward._id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-gray-200 dark:border-gray-700">
-              <div className="relative h-[200px] overflow-hidden">
-                <img
-                  src={reward.image_url}
-                  alt={reward.title}
-                  className="w-full h-[250px] object-cover object-top scale-125 translate-y-[-50px]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
-              </div>
+<div className="relative h-48 w-full bg-gray-100 overflow-hidden rounded-t-2xl">
+  <img
+    src={reward.image_url}
+    alt={reward.title}
+    className="w-full h-full object-cover"
+  />
+  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20" />
+</div>
+
+
+
               <div className="p-4 space-y-3">
                 <h3 className="font-semibold text-gray-800 dark:text-white line-clamp-2">{reward.title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{reward.description}</p>

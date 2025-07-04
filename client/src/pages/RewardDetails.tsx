@@ -49,7 +49,7 @@ export const RewardDetails = () => {
       const response = await transactionApi.redeemReward(reward._id);
       updatePoints?.(response.data.userPoints);
       toast.success('Reward redeemed successfully!');
-      navigate('/my-rewards');
+      navigate('/transactions');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to redeem reward');
     } finally {
@@ -80,14 +80,15 @@ export const RewardDetails = () => {
       <div className="max-w-3xl w-full bg-white rounded-2xl shadow border border-gray-100 overflow-hidden">
 
         {/* Image */}
-        <div className="relative h-[200px] overflow-hidden">
-          <img
-            src={reward.image_url}
-            alt={reward.title}
-            className="w-full object-cover object-top translate-y-[-100px]"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
-        </div>
+        <div className="relative w-full h-[250px] bg-gray-100 overflow-hidden">
+  <img
+    src={reward.image_url}
+    alt={reward.title}
+    className="w-full h-full object-cover"
+  />
+  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
+</div>
+
 
         {/* Status & Actions */}
         <div className="p-5 flex justify-between items-center">
@@ -114,9 +115,22 @@ export const RewardDetails = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <DetailItem icon={<FiShoppingBag />} label="Points Required" value={reward.points} />
             <DetailItem icon={<FiCalendar />} label="Expiry Date" value={new Date(reward.expiryDate).toLocaleDateString()} />
-            {isOwner && (
-              <DetailItem icon={<FiTag />} label="Reward Code" value={<code className="font-mono bg-gray-50 p-1 rounded">{reward.code}</code>} />
-            )}
+            {!isOwner && (
+  <div className="mt-4">
+    <button
+      onClick={handleRedeem}
+      disabled={reward.status !== 'available'}
+      className={`w-full py-2 rounded-lg font-medium flex items-center justify-center gap-2 ${
+        reward.status !== 'available'
+          ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+          : 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white hover:from-cyan-700 hover:to-blue-700'
+      }`}
+    >
+      {reward.status === 'available' ? 'Redeem Now' : 'Unavailable'}
+    </button>
+  </div>
+)}
+
           </div>
 
           {!isOwner && (

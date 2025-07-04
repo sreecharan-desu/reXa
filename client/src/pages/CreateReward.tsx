@@ -8,7 +8,6 @@ import {
   FiLoader, FiPlus, FiImage, FiCalendar, FiTag, FiCopy, FiShoppingBag
 } from 'react-icons/fi';
 
-import { parse } from 'date-fns';
 
 // Types
 interface ParsedCoupon {
@@ -107,55 +106,79 @@ const CreateReward = () => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const createSingleReward = async (data, index) => {
-    try {
-      setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'creating' } : item));
+const createSingleReward = async (data, index) => {
+  try {
+    setParsedResults(prev =>
+      prev.map((item, i) => i === index ? { ...item, status: 'creating' } : item)
+    );
 
-      const title = data.name?.trim();
-      const description = data.description?.trim();
-      const code = data['cupon-code']?.trim() || data.code?.trim();
-      const expiry = data.expiry_date?.trim();
-      const categoryText = data.category?.trim();
+    const title = data.name?.trim();
+    const description = data.description?.trim();
+    const code = data['cupon-code']?.trim() || data.code?.trim();
+    const expiry = data.expiry_date?.trim();
+    const categoryText = data.category?.trim();
 
-      const errors = [];
-      if (!title) errors.push('Title is missing');
-      if (!description) errors.push('Description is missing');
-      if (!code) errors.push('Coupon code is missing');
-      if (!expiry) errors.push('Expiry date is missing');
-      if (!categoryText) errors.push('Category is missing');
+    const errors = [];
+    if (!title) errors.push('Title is missing');
+    if (!description) errors.push('Description is missing');
+    if (!code) errors.push('Coupon code is missing');
+    if (!expiry) errors.push('Expiry date is missing');
+    if (!categoryText) errors.push('Category is missing');
 
-      if (errors.length) {
-        toast.error(`Cannot create reward: ${errors.join(', ')}`);
-        setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item));
-        return;
-      }
-
-      const categoryMatch = categoriesList.find(cat => categoryText.toLowerCase().includes(cat.name.toLowerCase()));
-      const categoryId = categoryMatch?._id || categoriesList[1]._id;
-
-
-      const points = typeof data.points === 'number' && !isNaN(data.points) ? data.points : 10;
-
-      const payload = {
-        title,
-        description,
-        points,
-        code,
-        expiryDate: expiry,
-        category: categoryId,
-        imageUrls: data.image_url ? [data.image_url] : [],
-        ocrText: data.ocr_text || '',
-      };
-
-      await rewardApi.create(payload);
-
-      setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'created' } : item));
-      toast.success(`${payload.title} created successfully!`);
-    } catch (e) {
-      toast.error(`Failed to create reward: ${e.message || 'Unknown error'}`);
-      setParsedResults(prev => prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item));
+    if (errors.length) {
+      toast.error(`Cannot create reward: ${errors.join(', ')}`);
+      setParsedResults(prev =>
+        prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item)
+      );
+      return;
     }
-  };
+
+    const categoryMatch = categoriesList.find(cat =>
+      categoryText.toLowerCase().includes(cat.name.toLowerCase())
+    );
+    const categoryId = categoryMatch?._id || categoriesList[1]._id;
+
+    const points = typeof data.points === 'number' && !isNaN(data.points) ? data.points : 10;
+
+    const payload = {
+      title,
+      description,
+      points,
+      code,
+      expiryDate: expiry,
+      category: categoryId,
+      imageUrls: data.image_url ? [data.image_url] : [],
+      ocrText: data.ocr_text || '',
+    };
+
+    const res = await rewardApi.create(payload);
+
+    // If no error is thrown, mark as created
+    setParsedResults(prev =>
+      prev.map((item, i) => i === index ? { ...item, status: 'created' } : item)
+    );
+    toast.success(`${payload.title} created successfully!`);
+
+  } catch (error) {
+    const apiError = error?.response?.data;
+
+    if (apiError?.errors && typeof apiError.errors === 'object') {
+      Object.entries(apiError.errors).forEach(([field, message]) => {
+        toast.error(`Error in ${field}: ${message}`);
+      });
+    } else if (apiError?.message) {
+      toast.error(`Failed to create reward: ${apiError.message}`);
+    } else {
+      toast.error(`Failed to create reward: ${error.message || 'Unknown error'}`);
+    }
+
+    setParsedResults(prev =>
+      prev.map((item, i) => i === index ? { ...item, status: 'parsed' } : item)
+    );
+  }
+};
+
+  
 
   const handleRetry = (index) => {
     const item = parsedResults[index];
@@ -192,7 +215,9 @@ const CreateReward = () => {
 
 {/* Header */}
 <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 px-8 py-5">
-  <div className="max-w-7xl mx-auto flex justify-between items-center">
+  <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    
+    {/* Left: Title & Subtitle */}
     <div>
       <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
         Coupon Manager
@@ -202,9 +227,10 @@ const CreateReward = () => {
       </p>
     </div>
 
-    <div className="flex items-center gap-4">
-
-
+    {/* Right: Actions */}
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+      
+      {/* Hidden File Input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -214,21 +240,49 @@ const CreateReward = () => {
         className="hidden"
       />
 
+      {/* Upload Button */}
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-2.5 rounded-lg flex items-center gap-2 font-medium border border-transparent"
+        className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-6 py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium border border-transparent w-full sm:w-auto"
       >
         <FiPlus className="w-4 h-4" />
         Upload Images
       </button>
+
+      {/* Create All Button */}
+      {parsedResults.some(p => p.status === 'parsed') && (
+        <button
+          disabled={loading}
+          onClick={handleCreateAll}
+          className={`px-6 py-2.5 rounded-lg text-white font-medium flex items-center justify-center gap-2 w-full sm:w-auto ${
+            loading
+              ? 'bg-gray-300 cursor-not-allowed'
+              : 'bg-gradient-to-r from-emerald-600 to-green-600 border border-transparent'
+          }`}
+        >
+          {loading ? (
+            <>
+              <FiLoader className="w-4 h-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            <>
+              <FiCheck className="w-4 h-4" />
+              Create All Rewards
+            </>
+          )}
+        </button>
+      )}
     </div>
   </div>
 </div>
 
+
 {/* Main Content */}
 <div className="flex-1 overflow-auto px-6 py-8">
   <div className="max-w-7xl mx-auto">
-    {parsedResults.length === 0 ? (
+    {
+    parsedResults.length === 0 ? (
       <div className="h-full flex flex-col justify-center items-center text-center">
         <div className="bg-gradient-to-br from-cyan-100 to-blue-100 p-8 rounded-2xl mb-6 border border-gray-200">
           <FiImage className="w-16 h-16 text-cyan-600 mx-auto mb-4" />
@@ -240,33 +294,9 @@ const CreateReward = () => {
       </div>
     ) : (
       <>
-        {parsedResults.some(p => p.status === 'parsed') && (
-          <div className="flex justify-end mb-6">
-            <button
-              disabled={loading}
-              onClick={handleCreateAll}
-              className={`px-6 py-3 rounded-lg text-white font-medium flex items-center gap-2 ${
-                loading
-                  ? 'bg-gray-300 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-emerald-600 to-green-600 border border-transparent'
-              }`}
-            >
-              {loading ? (
-                <>
-                  <FiLoader className="w-4 h-4" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <FiCheck className="w-4 h-4" />
-                  Create All Rewards
-                </>
-              )}
-            </button>
-          </div>
-        )}
+ 
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {parsedResults.map((item, index) => (
             <CouponCard
               key={item.id}
@@ -379,99 +409,116 @@ const CouponCard = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100">
-      {(item.image_url || item.image) && (
-        <div className="relative h-[100px] overflow-hidden">
-          <img
-            src={item.image_url || item.image}
-            alt="Coupon"
-            className="w-full h-auto object-cover object-top translate-y-[-70px]"
-          />
-        </div>
-      )}
+<div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full">
+  
+  {/* Image */}
+  {(item.image_url || item.image) && (
+    <div className="relative w-full h-64 bg-gray-100 overflow-hidden">
+      <img
+        src={item.image_url || item.image}
+        alt="Coupon"
+        className="w-full h-full object-cover"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+    </div>
+  )}
 
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-3">
-          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
-            {getStatusIcon(item.status)}
-            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-          </span>
-          <div className="flex items-center gap-1">
-            {item.status === 'parsed' && (
-              <button onClick={() => setIsEditing(!isEditing)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                <FiEdit3 className="w-3 h-3 text-gray-500" />
-              </button>
-            )}
-            {item.status === 'failed' && (
-              <button onClick={() => onRetry(index)} className="p-1 hover:bg-gray-100 rounded-lg transition-colors">
-                <FiRefreshCw className="w-3 h-3 text-gray-500" />
-              </button>
-            )}
-            <button onClick={() => onRemove(index)} className="p-1 hover:bg-red-100 rounded-lg transition-colors">
-              <FiX className="w-3 h-3 text-red-500" />
-            </button>
-          </div>
-        </div>
+  {/* Content */}
+  <div className="p-4 flex flex-col flex-1 justify-between">
 
-        {isEditing ? (
-          <div className="space-y-3">
-            <input
-              type="number"
-              value={editData.points}
-              onChange={(e) => setEditData({...editData, points: parseInt(e.target.value) || 10})}
-              placeholder="Points"
-              className="w-full p-2 border border-gray-200 rounded-lg text-sm"
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleSaveEdit}
-                className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg text-sm font-medium hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <h3 className="font-semibold text-gray-800 line-clamp-2">{item.name || 'Unnamed Coupon'}</h3>
-            {item.description && <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>}
-            {(item['cupon-code'] || item.code) && (
-              <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
-                <FiTag className="w-4 h-4 text-gray-500" />
-                <code className="text-sm font-mono text-gray-800 flex-1">{item['cupon-code'] || item.code}</code>
-                <button onClick={() => onCopyCode(item['cupon-code'] || item.code || '')} className="p-1 hover:bg-gray-200 rounded transition-colors">
-                  <FiCopy className="w-3 h-3 text-gray-500" />
-                </button>
-              </div>
-            )}
-            {item.expiry_date && (
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <FiCalendar className="w-4 h-4" />
-                <span>Expires: {item.expiry_date}</span>
-              </div>
-            )}
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <FiShoppingBag className="w-4 h-4" />
-              <span>Points: {item.points || 10}</span>
-            </div>
-            {item.status === 'parsed' && (
-              <button
-                onClick={() => onCreate(item, index)}
-                className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2.5 rounded-lg font-medium transition-all duration-200 transform hover:scale-105"
-              >
-                Create Reward
-              </button>
-            )}
-          </div>
+    {/* Status & Actions */}
+    <div className="flex justify-between items-start mb-3">
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(item.status)}`}>
+        {getStatusIcon(item.status)}
+        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+      </span>
+      <div className="flex items-center gap-1">
+        {item.status === 'parsed' && (
+          <button onClick={() => setIsEditing(!isEditing)} className="p-1 hover:bg-gray-100 rounded-lg">
+            <FiEdit3 className="w-3 h-3 text-gray-500" />
+          </button>
         )}
+        {item.status === 'failed' && (
+          <button onClick={() => onRetry(index)} className="p-1 hover:bg-gray-100 rounded-lg">
+            <FiRefreshCw className="w-3 h-3 text-gray-500" />
+          </button>
+        )}
+        <button onClick={() => onRemove(index)} className="p-1 hover:bg-red-100 rounded-lg">
+          <FiX className="w-3 h-3 text-red-500" />
+        </button>
       </div>
     </div>
+
+    {/* Editable / Non-Editable Section */}
+    {isEditing ? (
+      <div className="space-y-3">
+        <input
+          type="number"
+          value={editData.points}
+          onChange={(e) => setEditData({ ...editData, points: parseInt(e.target.value) || 10 })}
+          placeholder="Points"
+          className="w-full p-2 border border-gray-200 rounded-lg text-sm"
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={handleSaveEdit}
+            className="flex-1 bg-emerald-600 text-white py-2 rounded-lg text-sm hover:bg-emerald-700"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setIsEditing(false)}
+            className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg text-sm hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ) : (
+      <div className="space-y-3 flex flex-col flex-1 justify-between">
+
+        <div className="space-y-2">
+          <h3 className="font-semibold text-gray-800 text-base line-clamp-2">{item.name || 'Unnamed Coupon'}</h3>
+          {item.description && (
+            <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
+          )}
+
+          {(item['cupon-code'] || item.code) && (
+            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg">
+              <FiTag className="w-4 h-4 text-gray-500" />
+              <code className="text-sm font-mono text-gray-800 flex-1">{item['cupon-code'] || item.code}</code>
+              <button onClick={() => onCopyCode(item['cupon-code'] || item.code || '')} className="p-1 hover:bg-gray-200 rounded">
+                <FiCopy className="w-3 h-3 text-gray-500" />
+              </button>
+            </div>
+          )}
+
+          {item.expiry_date && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <FiCalendar className="w-4 h-4" />
+              <span>Expires: {item.expiry_date}</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <FiShoppingBag className="w-4 h-4" />
+            <span>Points: {item.points || 10}</span>
+          </div>
+        </div>
+
+        {item.status === 'parsed' && (
+          <button
+            onClick={() => onCreate(item, index)}
+            className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white py-2.5 rounded-lg font-medium transition-transform transform hover:scale-105"
+          >
+            Create Reward
+          </button>
+        )}
+      </div>
+    )}
+  </div>
+</div>
+
   );
 };
 
