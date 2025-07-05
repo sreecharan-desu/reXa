@@ -71,10 +71,10 @@ const CreateReward = () => {
       reader.onloadend = async () => {
         try {
           const base64 = reader.result;
-          const res = await fetch('https://dark-lord-chamber-production.up.railway.app/api/process-image', {
+          const res = await fetch('https://dark-lord-chamber-production.up.railway.app/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image_data: base64 }),
+            body: JSON.stringify({ image_data: base64 ,message : "Hi",timestamp : Date.now()}),
           });
           const data = await res.json();
 
@@ -183,6 +183,7 @@ const createSingleReward = async (data, index) => {
   const handleRetry = (index) => {
     const item = parsedResults[index];
     if (item?.file) {
+      handleRemove(index)
       handleImageUpload({ target: { files: [item.file] } });
     }
   };
