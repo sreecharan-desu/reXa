@@ -29,6 +29,8 @@ const seedCategories = async () => {
   }
 };
 
+console.log(CONFIG.MONGODB_URI)
+
 // Connect to MongoDB
 mongoose.connect(CONFIG.MONGODB_URI!)
   .then(async () => {
