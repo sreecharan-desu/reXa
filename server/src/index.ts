@@ -6,6 +6,7 @@ import { Category } from './models/category.model';  // Make sure path is correc
 
 const PORT = CONFIG.PORT || 5000;
 
+
 const categoriesList = [
   { _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439011'), name: 'Gaming', slug: 'gaming', icon: '🎮', description: 'Gaming rewards' },
   { _id: new mongoose.Types.ObjectId('507f1f77bcf86cd799439012'), name: 'Shopping', slug: 'shopping', icon: '🛍️', description: 'Shopping rewards' },
