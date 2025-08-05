@@ -85,7 +85,7 @@ export const Home = () => {
       setLoading(false);
       setFilteredRewards(rewards);
     }
-  }, [rewards]);
+  }, []);
 
   useEffect(() => {
     const filtered = rewards.filter(reward => {
