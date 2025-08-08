@@ -7,7 +7,6 @@ export interface AuthRequest extends Request {
     userId: string;
   };
 }
-
 export const auth = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
