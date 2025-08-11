@@ -6,6 +6,7 @@ The Rexa system is a comprehensive platform designed to facilitate reward manage
 
 ## System Architecture
 
+
 The Rexa system follows a client-server architecture. The server, built with Node.js, Express, and Mongoose, exposes a RESTful API for the client to interact with. The client, built with React, consumes this API to provide a user-friendly interface.
 
 ### Server-Side Architecture
