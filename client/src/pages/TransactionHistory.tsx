@@ -1,18 +1,36 @@
-import { useEffect, useState } from 'react';
-import { useRecoilState } from 'recoil';
-import { transactionApi } from '../services/api';
-import { FiGift, FiClock, FiUser, FiHash, FiSearch, FiFilter, FiX } from 'react-icons/fi';
-import { format, isWithinInterval } from 'date-fns';
-import { useAuth } from '../context/AuthContext';
-import { transactionsState, transactionsLoadingState, transactionsErrorState } from '../store/atoms';
-import { LoadingSpinner } from '../components/LoadingSpinner';
+import { useEffect, useState } from "react";
+import { useRecoilState } from "recoil";
+import { transactionApi } from "../services/api";
+import {
+  FiGift,
+  FiClock,
+  FiUser,
+  FiHash,
+  FiSearch,
+  FiFilter,
+  FiX,
+} from "react-icons/fi";
+import { format, isWithinInterval } from "date-fns";
+import { useAuth } from "../context/AuthContext";
+import {
+  transactionsState,
+  transactionsLoadingState,
+  transactionsErrorState,
+} from "../store/atoms";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 
 interface Transaction {
   _id: string;
   fromUser: { _id: string; name: string };
   toUser: { _id: string; name: string };
   points: number;
-  reward: { _id: string; title: string; description: string; points: number; code?: string } | null;
+  reward: {
+    _id: string;
+    title: string;
+    description: string;
+    points: number;
+    code?: string;
+  } | null;
   type: string;
   createdAt: string;
   updatedAt: string;
@@ -23,25 +41,28 @@ export const TransactionHistory = () => {
   const [transactions, setTransactions] = useRecoilState(transactionsState);
   const [isLoading, setIsLoading] = useRecoilState(transactionsLoadingState);
   const [error, setError] = useRecoilState(transactionsErrorState);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateRange, setDateRange] = useState<[string, string]>(['', '']);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateRange, setDateRange] = useState<[string, string]>(["", ""]);
   const [pointsRange, setPointsRange] = useState<[number, number]>([0, 100]);
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [typeFilter, setTypeFilter] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions);
+  const [filteredTransactions, setFilteredTransactions] = useState<
+    Transaction[]
+  >([]);
 
+  // Fetch transactions once on mount
   const fetchTransactions = async () => {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await transactionApi.getHistory();
-      const data = Array.isArray(response.data) ? response.data : [];
+      const data = Array.isArray(response?.data) ? response.data : [];
       setTransactions(data);
       setFilteredTransactions(data);
     } catch (err) {
-      console.error('Failed to fetch transactions:', err);
-      setError('Failed to load transactions');
+      console.error("Failed to fetch transactions:", err);
+      setError("Failed to load transactions");
       setTransactions([]);
       setFilteredTransactions([]);
     } finally {
@@ -50,41 +71,51 @@ export const TransactionHistory = () => {
   };
 
   useEffect(() => {
-    if (!transactions || transactions.length === 0) {
-      fetchTransactions();
-    } else {
-      setIsLoading(false);
-      setFilteredTransactions(transactions);
-    }
-  }, [transactions]);
+    fetchTransactions();
+  }, []); // ✅ Only runs once
 
+  // Filter transactions whenever filters/search change
   useEffect(() => {
-    const filtered = transactions.filter(transaction => {
+    const filtered = transactions.filter((transaction) => {
       const matchesSearch =
-        (transaction.reward?.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         transaction.reward?.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         transaction.fromUser.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-         transaction.toUser.name.toLowerCase().includes(searchQuery.toLowerCase())) ??
+        (transaction.reward?.title
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+          transaction.reward?.description
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          transaction.fromUser?.name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          transaction.toUser?.name
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())) ??
         true;
-      const matchesPoints = transaction.points >= pointsRange[0] && transaction.points <= pointsRange[1];
+
+      const matchesPoints =
+        transaction.points >= pointsRange[0] &&
+        transaction.points <= pointsRange[1];
       const matchesType = !typeFilter || transaction.type === typeFilter;
       const transactionDate = new Date(transaction.createdAt);
       const matchesDate =
-        !dateRange[0] || !dateRange[1] ||
+        !dateRange[0] ||
+        !dateRange[1] ||
         isWithinInterval(transactionDate, {
           start: new Date(dateRange[0]),
           end: new Date(dateRange[1]),
         });
+
       return matchesSearch && matchesPoints && matchesType && matchesDate;
     });
+
     setFilteredTransactions(filtered);
   }, [searchQuery, pointsRange, typeFilter, dateRange, transactions]);
 
   const handleClearFilters = () => {
-    setSearchQuery('');
-    setDateRange(['', '']);
+    setSearchQuery("");
+    setDateRange(["", ""]);
     setPointsRange([0, 100]);
-    setTypeFilter('');
+    setTypeFilter("");
     setShowFilters(false);
   };
 
@@ -118,7 +149,9 @@ export const TransactionHistory = () => {
         {showFilters && (
           <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-4">
-              <h4 className="font-semibold text-gray-800 dark:text-white">Filters</h4>
+              <h4 className="font-semibold text-gray-800 dark:text-white">
+                Filters
+              </h4>
               <button
                 onClick={handleClearFilters}
                 className="text-sm text-cyan-600 hover:text-cyan-700 flex items-center gap-1"
@@ -135,7 +168,9 @@ export const TransactionHistory = () => {
                   <input
                     type="number"
                     value={pointsRange[0]}
-                    onChange={(e) => setPointsRange([+e.target.value, pointsRange[1]])}
+                    onChange={(e) =>
+                      setPointsRange([+e.target.value, pointsRange[1]])
+                    }
                     placeholder="Min"
                     className="w-1/2 p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-cyan-500"
                   />
@@ -143,7 +178,9 @@ export const TransactionHistory = () => {
                   <input
                     type="number"
                     value={pointsRange[1]}
-                    onChange={(e) => setPointsRange([pointsRange[0], +e.target.value])}
+                    onChange={(e) =>
+                      setPointsRange([pointsRange[0], +e.target.value])
+                    }
                     placeholder="Max"
                     className="w-1/2 p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-cyan-500"
                   />
@@ -160,6 +197,7 @@ export const TransactionHistory = () => {
                 >
                   <option value="">All Types</option>
                   <option value="redemption">Redemption</option>
+                  <option value="transfer">Transfer</option>
                 </select>
               </div>
               <div>
@@ -170,14 +208,18 @@ export const TransactionHistory = () => {
                   <input
                     type="date"
                     value={dateRange[0]}
-                    onChange={(e) => setDateRange([e.target.value, dateRange[1]])}
+                    onChange={(e) =>
+                      setDateRange([e.target.value, dateRange[1]])
+                    }
                     className="w-1/2 p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-cyan-500"
                   />
                   <span className="text-gray-500">-</span>
                   <input
                     type="date"
                     value={dateRange[1]}
-                    onChange={(e) => setDateRange([dateRange[0], e.target.value])}
+                    onChange={(e) =>
+                      setDateRange([dateRange[0], e.target.value])
+                    }
                     className="w-1/2 p-2 border border-gray-200 dark:border-gray-700 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-cyan-500"
                   />
                 </div>
@@ -187,7 +229,6 @@ export const TransactionHistory = () => {
         )}
       </div>
 
-  
       {/* Transaction List */}
       <div className="space-y-6">
         {isLoading ? (
@@ -205,12 +246,13 @@ export const TransactionHistory = () => {
                   <div className="flex items-center space-x-2">
                     <FiClock className="text-gray-400" />
                     <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      {format(new Date(transaction.createdAt), 'MMM d, yyyy')}
+                      {format(new Date(transaction.createdAt), "MMM d, yyyy")}
                     </span>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-cyan-600 dark:text-cyan-400 text-sm sm:text-base">
-                      {(transaction.reward?.points ?? transaction.points ?? 0)} points
+                      {transaction.reward?.points ?? transaction.points ?? 0}{" "}
+                      points
                     </p>
                   </div>
                 </div>
@@ -222,17 +264,20 @@ export const TransactionHistory = () => {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                      {transaction.reward?.title ?? 'Deleted Reward'}
+                      {transaction.reward?.title ?? "Deleted Reward"}
                       <span
                         className={`px-3 py-1 text-xs font-semibold rounded-full border border-white/20 shadow-sm ${
-                          transaction.reward ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-red-100 text-red-500 border-red-200'
+                          transaction.reward
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                            : "bg-red-100 text-red-500 border-red-200"
                         }`}
                       >
-                        {transaction.reward ? 'Active' : 'Deleted'}
+                        {transaction.reward ? "Active" : "Deleted"}
                       </span>
                     </h3>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                      {transaction.reward?.description ?? 'No description available.'}
+                      {transaction.reward?.description ??
+                        "No description available."}
                     </p>
                     {transaction.reward?.code && (
                       <div className="mt-3 flex flex-wrap items-center space-x-2 text-sm">
@@ -245,13 +290,17 @@ export const TransactionHistory = () => {
                     <div className="mt-3 flex flex-wrap items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                       <FiUser className="text-gray-400" />
                       <span>
-                        From{' '}
+                        From{" "}
                         <span className="font-medium">
-                          {transaction.fromUser?._id === user?._id ? 'You' : transaction.fromUser?.name ?? 'Unknown'}
-                        </span>{' '}
-                        to{' '}
+                          {transaction.fromUser?._id === user?._id
+                            ? "You"
+                            : transaction.fromUser?.name ?? "Unknown"}
+                        </span>{" "}
+                        to{" "}
                         <span className="font-medium">
-                          {transaction.toUser?._id === user?._id ? 'You' : transaction.toUser?.name ?? 'Unknown'}
+                          {transaction.toUser?._id === user?._id
+                            ? "You"
+                            : transaction.toUser?.name ?? "Unknown"}
                         </span>
                       </span>
                     </div>
@@ -262,7 +311,9 @@ export const TransactionHistory = () => {
           ))
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-500 dark:text-gray-400">No transactions found</p>
+            <p className="text-gray-500 dark:text-gray-400">
+              No transactions found
+            </p>
           </div>
         )}
       </div>
